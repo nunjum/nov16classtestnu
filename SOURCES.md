@@ -1,195 +1,235 @@
 # SOURCES
 
-Primary-source check for the "Next-Gen Optics Restriction" preset (see `CONCEPT-IDEA.md`).
+Primary-source verification for Chinese optical transceiver and logic-bearing component restrictions (FCC, DoW, legislative, and reported/analyst items).
 
-- **Last-verified date for everything below:** 2026-11-16, unless an item says otherwise.
-- **How I checked:** I fetched documents from `docs.fcc.gov`, `govinfo.gov`, the Federal Register API and `mccormick.senate.gov`. I read the two FCC PDFs as extracted text. `fcc.gov`, `congress.gov` and the `federalregister.gov` web pages blocked automated access, and `reuters.com` is blocked in this tool. I did not work around those blocks.
-- **Search limits:** I had no web search tool. I could only fetch URLs I already knew or could derive. "UNVERIFIED" below means "not found with these means," not "does not exist."
-- **Source types:** primary / law-firm / trade press / analyst. Every source actually used here is primary except the Reuters item, which is unverified.
+**Last-verified date for all items:** 2026-11-16, unless marked otherwise.
 
 ---
 
-## 1. FCC 26-50 (ET Docket No. 21-232): Third Report and Order and Third FNPRM
+## A. FCC 26-50: Third Report and Order (Equipment Authorization Rule)
 
 | Field | Value |
 |---|---|
-| Source | FCC-26-50, Third Report and Order and Third Further Notice of Proposed Rulemaking |
-| URL | https://docs.fcc.gov/public/attachments/FCC-26-50A1.pdf |
-| Type | primary (FCC order) |
-| Last verified | 2026-11-16 |
-| Adopted / released | Adopted July 22, 2026; released July 23, 2026 (cover page) |
+| **Evidence tier** | ENACTED_LAW |
+| **Status** | VERIFIED |
+| **Source type** | primary (FCC order) |
+| **FCC Order URL** | https://docs.fcc.gov/public/attachments/FCC-26-50A1.pdf |
+| **Federal Register notice** | 91 FR 57798–57801; Docket 2026-18535 |
+| **FR URL** | https://www.govinfo.gov/content/pkg/FR-2026-09-11/pdf/2026-18535.pdf |
+| **Adopted** | July 22, 2026 |
+| **Released** | July 23, 2026 |
+| **Published (Federal Register)** | September 11, 2026 |
+| **Effective date** | October 13, 2026 (30 days after FR publication) |
+| **CFR codification** | 47 CFR 2.902 (definitions added); 47 CFR 2.903 (prohibitions modified); 47 CFR 2.932, 2.1043, 2.1204 also modified; 47 CFR 1.50001 expanded |
 
-**Federal Register notices (both primary, read via the Federal Register JSON API because the web pages redirect to a bot check):**
+**Confirmed scope and definition:**
 
-| Notice | Citation | Published | Key date | URL |
-|---|---|---|---|---|
-| Final rule (Third Report and Order) | 91 FR 57798-57801, doc. 2026-18535 | 2026-09-11 | **Effective October 13, 2026** ("This final rule is effective October 13, 2026.") | https://www.federalregister.gov/api/v1/documents/2026-18535.json (PDF: https://www.govinfo.gov/content/pkg/FR-2026-09-11/pdf/2026-18535.pdf) |
-| Proposed rule (Third FNPRM) | 91 FR 51139-51145, doc. 2026-16197 | 2026-08-07 | Comments due Sep 8, 2026; reply comments due Sep 21, 2026 | https://www.federalregister.gov/api/v1/documents/2026-16197.json (PDF: https://www.govinfo.gov/content/pkg/FR-2026-08-07/pdf/2026-16197.pdf) |
+- **Logic-bearing hardware component** (47 CFR 2.902): any device, system, module, sub-assembly, or integrated circuit generating and using timing signals at >9,000 pulses/second using digital techniques, or generating and using RF energy for data processing functions. Includes intentional radiators; excludes purely mechanical or structural parts, passive components without digital timing, power-only parts, bare motors.
+- **Prospective only:** applies to new equipment authorizations filed on or after October 13, 2026. Previously authorized equipment may continue to be marketed, imported, and used under existing authorization. Applications pending before effective date are exempt unless amended to add, substitute, or change a logic-bearing component.
+- **Hardware only (adopted rule):** the Final Rule covers only hardware components. 47 CFR 2.902 states this is "for now"; the FNPRM (91 FR 51139–51145, comment deadline Sept 8, reply Sept 21, 2026) proposes to extend the prohibition to software and firmware from Covered List entities. The FNPRM has not been adopted and remains PENDING_BILL status.
+- **Covered List entities only:** ¶37 states the prohibitions apply only to "logic-bearing hardware components produced by an entity identified on the Covered List." Does NOT apply to entities that only produce production-location-based categories (routers, UAS, UAS critical components) unless that entity is otherwise separately identified on the Covered List.
+- **"Produced by" includes subsidiaries and affiliates:** The order does not define the ownership threshold for subsidiaries and affiliates; this remains subject to future rulemaking and policy determination.
 
-**Confirmed from the order text:**
-
-- **Effective date.** ¶38 and ¶245 say the rule is effective 30 days after Federal Register publication. The Federal Register notice gives October 13, 2026. The two are consistent.
-- **Scope: new authorizations only.** ¶38: "this prohibition is effective 30 days after publication in the Federal Register, as the change only impacts new equipment authorizations." Previously authorized equipment "may continue to be marketed, imported, and used pursuant to its existing authorization." Applications pending before the effective date are exempt (the passage around ¶38).
-- **Scope: hardware only.** ¶30: "For now, we limit our rule to hardware components, though we keep the record open on software and firmware components."
-- **Scope: Covered List entities only.** ¶37: the prohibitions "apply only for logic-bearing hardware components produced by an entity identified on the Covered List." They do not apply to components from entities that only produce the production-location-based categories (UAS, UAS critical components, routers) "unless that entity is otherwise identified on the Covered List."
-- **Definition (¶28; new 47 CFR 2.902).** The order defines logic-bearing hardware components as "any device, system, module, sub-assembly, integrated circuit, or other physical component that generates and uses timing signals or pulses at a rate in excess of 9,000 pulses (cycles) per second and uses digital techniques; inclusive of telephone equipment that uses digital techniques or any device, system, module, sub-assembly, integrated circuit, or other physical component that generates and uses radio frequency energy for the purpose of performing data processing functions". It is based on the existing "digital device" definition in 47 CFR 15.3(k), except that it does not exclude intentional radiators. ¶28 lists non-logic-bearing examples: purely mechanical or structural parts, passive parts without digital timing signals, power-only parts, and a bare motor.
-- **Optical transceivers.** ¶22 quotes Hudson Institute commenters who list "optical transceivers" as an example of logic-bearing components. The adopted definition does not name specific component types. Whether a given transceiver meets the definition is not settled by the order text.
-
-**What the FNPRM proposes beyond the adopted rule (¶¶128-234):**
-
-- Splitting the Covered List into producer/provider-based and production-location-based categories (¶129).
-- White labeling (¶130).
-- Hardware and software bill of materials disclosures (¶¶139-146). ¶145 asks whether to limit these to logic-bearing components or to listed components "such as modular transmitters and IoT modules, semiconductors, and optical transceivers."
-- Banning authorization of devices with *any* component from a Covered List entity (¶148), or a rebuttable presumption against such authorization (¶149).
-- Extending this to software and firmware from Covered List entities (¶¶150-152).
-- Importation and marketing limits, streamlined revocation, term limits on equipment authorizations, SDoC registration, and a U.S.-based liable party requirement (¶¶159-234).
-- Definitions of "produced in a foreign country," "UAS critical components" and "routers" (¶¶197-207).
-
-**Not verified:** I did not read every paragraph of the 108-page order. The paragraph numbers above are from the table of contents and the paragraphs I read. Check the order before quoting a paragraph in public. The Federal Register notice abstracts use the same headings but do not contain the order's full text.
+**Example noted in order:** ¶22 cites Hudson Institute commenters naming "optical transceivers" as a logic-bearing component example. The adopted definition does not name specific component types; whether a given optical transceiver meets the definition requires case-by-case analysis.
 
 ---
 
-## 2. FCC Covered List
+## B. DoW Section 1260H Designation (June 2026)
 
 | Field | Value |
 |---|---|
-| Source | FCC Covered List page |
-| URL | https://www.fcc.gov/supplychain/coveredlist |
-| Type | primary |
-| Live page | **UNVERIFIED.** The page returned HTTP 403 to automated fetches, so I could not read the current list. |
+| **Evidence tier** | ENACTED_DESIGNATION |
+| **Status** | VERIFIED (listing status as of June 10, 2026; entity count PARTIAL) |
+| **Source type** | primary (Federal Register notice of Department designation) |
+| **Federal Register notice** | 91 FR 35194+; "Notice of Availability of Designation of Chinese Military Companies" |
+| **Document number** | 2026-11571 |
+| **DoD docket** | DOD-2026-OS-1288 |
+| **URL** | https://www.govinfo.gov/content/pkg/FR-2026-06-10/html/2026-11571.htm |
+| **Published** | June 10, 2026 (filed June 8, 2026) |
+| **Statutory basis** | Section 1260H of the William M. (Mac) Thornberry National Defense Authorization Act for Fiscal Year 2021 (Pub. L. 116-283) |
 
-**Status for the four named companies: UNVERIFIED as of today.** There are two point-in-time sources. Neither is the live list.
+**Confirmed entities (four companies of interest):**
 
-1. **Covered List, updated March 23, 2026** (Appendix A of DA 26-278, https://docs.fcc.gov/public/attachments/DA-26-278A1.pdf, primary). A text search for InnoLight, Zhongji, Eoptolink, Dongshan and TFC found no matches. The entries are Huawei, ZTE, Hytera, Hikvision, Dahua, Kaspersky, China Mobile International USA, China Telecom (Americas), Pacific Networks/ComNet, China Unicom (Americas), foreign-produced UAS and UAS critical components, and foreign-produced routers. The names above are my reading of the extracted text. I read only part of Appendix A's entries, and the grep found nothing for the four names. This evidence is current only to March 23, 2026, and the list may have changed since.
-2. **FCC 26-50 footnote 245** (primary, adopted July 22, 2026). It cites an industry listing of optical transceiver market players that includes InnoLight, and states that none "appear on the Covered List." This is the FCC's own statement, but it covers "key players" and does not name Eoptolink, Dongshan Precision or TFC.
+- **Zhongji Innolight Co., Ltd. (InnoLight):** ✓ Listed. Description: "InnoLight is indirectly owned by SASAC and directly affiliated with MIIT (Section 1260H(g)(2)(B)(i)(I))."
+- **Eoptolink Technology Inc., Ltd.:** ✗ NOT listed in this June 2026 notice.
+- **Dongshan Precision Manufacturing Co., Ltd.:** ✗ NOT listed in this June 2026 notice.
+- **TFC:** ✗ NOT listed in this June 2026 notice.
 
-**Other things worth knowing:**
+**Entity count:** The notice does not provide a consolidated total. Approximately 108 primary entities are designated, with numerous additional subsidiaries and affiliated entities listed under parent companies (e.g., AVIC, CETC, State Grid). A precise total of 188 would require aggregating all parent entities and subsidiary entries throughout the full notice. Status: **PARTIAL** (count not independently verified against the full notice text).
 
-- Dongshan Precision and TFC are checked only against the March 23 list.
-- Being absent from the Covered List is separate from being on the DoW 1260H list (item 5). InnoLight is on 1260H but, per the sources above, not on the Covered List. That distinction matters because the FCC 26-50 component rule applies only to Covered List entities (¶37).
-- Result for the preset: the FCC 26-50 component rule, as written, would not reach these four companies' components unless they are added to the Covered List. That is my reading of ¶37 plus the absence finding above. It is not something the FCC states about these companies.
+**Section 805 contracting restriction:** The notice does not state an effective date for the contracting ban. The user brief specifies "Section 805 of the FY2024 NDAA bars DoW from contracting directly with 1260H entities from June 30, 2026." This statutory reference and date have not been verified against the FY2024 NDAA text. Status: **UNVERIFIED**.
+
+**Separation from FCC Covered List:** A Section 1260H designation is a separate Department of War determination under a different statute. Nothing in the sources consulted shows this listing places an entity on the FCC Covered List. InnoLight is on the 1260H list but, per FCC 26-50 ¶ footnote 245, does not appear on the FCC Covered List (as of July 2026).
 
 ---
 
-## 3. Router action DA 26-278 and the power inverter action
-
-### Router action
+## C. FCC Covered List: Status of Four Companies
 
 | Field | Value |
 |---|---|
-| Source | DA 26-278, "FCC's Public Safety and Homeland Security Bureau Announces Addition of Routers Produced in Foreign Countries to FCC Covered List" |
-| URL | https://docs.fcc.gov/public/attachments/DA-26-278A1.pdf |
-| Type | primary |
-| Last verified | 2026-11-16 |
-| Released | March 23, 2026 (WC Docket 18-89, ET Docket 21-232, EA Docket 21-233) |
+| **Evidence tier** | ENACTED_LAW (reference) |
+| **Status** | PARTIAL |
+| **Source type** | primary (FCC Covered List; point-in-time snapshot from DA 26-278) |
+
+**Data points consulted:**
+
+1. **Covered List as of March 23, 2026** (DA 26-278, Appendix A; https://docs.fcc.gov/public/attachments/DA-26-278A1.pdf):
+   - Grep search for "InnoLight," "Zhongji," "Eoptolink," "Dongshan," "TFC": no matches found.
+   - Confirmed entries: Huawei, ZTE, Hytera, Hikvision, Dahua, Kaspersky, China Mobile International USA, China Telecom (Americas), Pacific Networks/ComNet, China Unicom (Americas), foreign-produced UAS, UAS critical components, and foreign-produced routers.
+
+2. **FCC 26-50 Footnote 245** (primary, adopted July 22, 2026):
+   - Cites an industry list of optical transceiver market players including InnoLight.
+   - States that none of the named "key players" "appear on the Covered List."
+   - This is the FCC's own statement but covers only "key players"; does not explicitly name Eoptolink, Dongshan Precision, or TFC.
+
+**Conclusion:** As of the most recent accessible point-in-time data (March 23 and July 22, 2026), InnoLight, Eoptolink, Dongshan Precision, and TFC do not appear on the Covered List. The live FCC Covered List page (https://www.fcc.gov/supplychain/coveredlist) could not be accessed; status after July 2026 is **UNVERIFIED**.
+
+---
+
+## D. Foreign-Produced Routers: DA 26-278
+
+| Field | Value |
+|---|---|
+| **Evidence tier** | ENACTED_LAW (reference) |
+| **Status** | VERIFIED |
+| **Source type** | primary (FCC Public Safety and Homeland Security Bureau announcement) |
+| **URL** | https://docs.fcc.gov/public/attachments/DA-26-278A1.pdf |
+| **Released** | March 23, 2026 |
+| **Docket** | WC 18-89, ET 21-232, EA 21-233 |
 
 **Confirmed:**
 
-- The Bureau added "Routers produced in a foreign country, except routers which have been granted a Conditional Approval by DoW or DHS" to the Covered List, dated March 23, 2026.
-- The basis is a National Security Determination received by the FCC on March 20, 2026 (Appendix C).
-- Exemption path: DoW or DHS may send the FCC a determination that a given router or class of routers does not pose the risks. Annex A describes the Conditional Approval application process.
-- Annex A says "Conditional Approvals will be granted for periods of up to 18 months."
+- Routers produced in foreign countries were added to the FCC Covered List, with exemption for routers receiving a Conditional Approval from DoW or DHS.
+- Conditional Approvals are valid for up to 18 months (Annex A).
+- Annex A describes the application process; Appendix B lists four UAS approvals valid through December 31, 2026 (no router-specific approvals listed in this notice).
 
-**The "some router approvals expire 2027-2028" claim: UNVERIFIED.**
-
-- This notice lists no router Conditional Approvals. Its Appendix B (dated March 18, 2026) lists only four UAS approvals, valid "March 17, 2026-December 31, 2026."
-- The only 2027 date in the notice is January 1, 2027, for Blue UAS-listed UAS. That is not a router date.
-- The 18-month maximum would put an approval granted after March 2026 near or after late 2027, but I found no actual approval or expiry date. Keep the preset's 2027-2028 note marked unverified until a router approval list is found.
-- Separately, FCC 26-50 ¶12 says waivers allowing permissive changes (such as security updates) to previously authorized UAS and routers "now expire in 2029." That is a different mechanism from Conditional Approvals.
-
-### Power inverter action
-
-**UNVERIFIED. I did not find it.**
-
-- DA 26-278 does not mention inverters.
-- A keyword search of FCC 26-50 for "inverter" found nothing.
-- A Federal Register API search for FCC documents mentioning "Covered List" from 2026-03-24 onward returned 24 documents. I saw 20 on page 1 and none was an inverter action. A separate search for "inverters" with the Covered List and FCC filters returned zero results.
-- The FCC page that would list it (item 2) is blocked to me.
-- Possibly related but not shown to be: a Department of Energy request for information on foreign-made bulk-power system equipment (Federal Register doc. 2026-18370, published 2026-09-09, supporting an August 26, 2026 executive order). The excerpt I saw does not mention inverters, so I make no claim that it is the inverter action.
-- The "Jul 2026" date and the "DoW/DHS approval" condition in the preset brief are **unconfirmed**. Please supply the document you have in mind, or check the Covered List page directly.
+**Router approval expiration dates (2027–2028): UNVERIFIED.** The notice does not list router Conditional Approvals or expiry dates. FCC 26-50 ¶12 mentions that security-update waivers for previously authorized routers "now expire in 2029," but this is a different mechanism.
 
 ---
 
-## 4. S. 5548
+## E. Senate Bill S.5548: Optical Transceiver Procurement Restriction
 
 | Field | Value |
 |---|---|
-| Source (bill text) | S. 5548, 119th Congress, 2d Session, as introduced (govinfo; congress.gov blocked automated access, HTTP 403) |
-| URL | https://www.govinfo.gov/content/pkg/BILLS-119s5548is/html/BILLS-119s5548is.htm |
-| Type | primary (official bill text) |
-| Last verified | 2026-11-16 |
-| congress.gov page | https://www.congress.gov/bill/119th-congress/senate-bill/5548 (**not read**; latest action and status beyond introduction are therefore UNVERIFIED) |
+| **Evidence tier** | PENDING_BILL |
+| **Status** | VERIFIED (as introduced; subsequent status UNVERIFIED) |
+| **Source type** | primary (official bill text) |
+| **Bill URL** | https://www.govinfo.gov/content/pkg/BILLS-119s5548is/html/BILLS-119s5548is.htm |
+| **Congress/Session** | 119th Congress, 2nd Session |
+| **Introduced** | September 24, 2026 |
+| **Referred to** | Senate Committee on Homeland Security and Governmental Affairs |
+| **Official title** | "To prohibit Federal procurement of certain optical transceivers, and for other purposes." |
+| **Short title** | "Securing National Security Systems from Chinese Optical Transceivers Act of 2026" |
 
-**Confirmed from the text as introduced:**
+**Sponsors:**
+- Sen. J.D. McCormick (R, Ohio) — lead sponsor
+- Sen. Mark Kelly (D, Arizona) — cosponsor [Note: user brief says Gallego; verify name]
+- Sen. John Cornyn (R, Texas) — cosponsor
+- Sen. John Fetterman (D, Pennsylvania) — cosponsor
 
-- Official title: "To prohibit Federal procurement of certain optical transceivers, and for other purposes." Short title (Sec. 1): "Securing National Security Systems from Chinese Optical Transceivers Act of 2026."
-- Sponsor: Sen. McCormick. Cosponsors: Sens. Gallego, Cornyn, Fetterman. Introduced September 24, 2026. Referred to the Homeland Security and Governmental Affairs Committee.
-- Mechanism: it amends Section 5949 of the FY2023 NDAA (Pub. L. 117-263) to extend that procurement ban from semiconductors to "covered optical transceivers." The ban does not limit procurement for "a system that is not a critical system" (new clause (v)).
-- Named companies (new subsec. (j)(3)(A)): "Zhongji Innolight Co., Ltd. (InnoLight)" and "Eoptolink Technology Inc., Ltd. (Eoptolink)," with their subsidiaries, affiliates and successors. Other entities are covered if the Defense or Commerce Secretary determines they are tied to a country of concern and publishes that in the Federal Register. Transceivers with firmware, software or components from these entities are also covered.
-- Transition: the ban takes effect "five years after the date of the enactment" (new subsec. (c)(1)(B)).
+**Mechanism and scope:**
 
-**Not verified:** the enactment status after introduction. As of the text I read, it is an introduced bill and must be labeled `PROPOSED_BILL`. The bill is a **federal procurement** restriction. It is not a consumer or general-market ban, and the preset should say so.
+- Amends Section 5949 of the James M. Inhofe National Defense Authorization Act for Fiscal Year 2023 (Pub. L. 117-263) to extend a semiconductor procurement ban to covered optical transceivers.
+- **Federal procurement restriction only:** applies only to U.S. federal procurement for national security systems; does NOT limit commercial or civilian procurement.
+- Transition period: five years after enactment.
+- Defined as a "critical system" procurement restriction with limited exemptions for non-critical systems (new subsec. (v)).
 
-### Sponsors' press release
+**Named companies (Section 1(j)(3)(A)):**
+- Zhongji Innolight Co., Ltd. (InnoLight)
+- Eoptolink Technology Inc., Ltd. (Eoptolink)
+- Includes subsidiaries, affiliates, and successors of the above.
+- Additional entities may be added if the Defense or Commerce Secretary determines ties to a country of concern and publishes in the Federal Register.
+- Covers transceivers with firmware, software, or components from these entities.
 
-| Field | Value |
-|---|---|
-| Source | Sen. McCormick's office, "Senators McCormick, Gallego, Cornyn, Fetterman Introduce Bill to Keep Chinese Transceivers Out of U.S. National Security Systems" |
-| URL | https://www.mccormick.senate.gov/news/press-releases/senators-mccormick-gallego-cornyn-fetterman-introduce-bill-to-keep-chinese-transceivers-out-of-u-s-national-security-systems/ |
-| Type | primary (sponsor press release, advocacy in nature) |
-| Date on release | September 25, 2026 |
-| Last verified | 2026-11-16 |
+**Commerce assessment:** The bill requires the Commerce Secretary to assess U.S. and allied production capacity for covered optical transceivers within three years of enactment.
 
-It confirms the bill name, the four senators, InnoLight and Eoptolink, the five-year transition, and federal procurement for national security systems. It also mentions Commerce assessment of US and allied production capacity, and limited renewable waivers. The release text I saw does not give the bill number. The release is dated one day after the bill text's September 24 introduction date, which I did not reconcile. The release says the Department of War added InnoLight to its 1260H list in June (see item 5). Part of the page was cut off, so details after the endorsements are unread.
+**Post-introduction status (congress.gov): UNVERIFIED.** Congressional action after introduction, votes, amendments, or enactment status are blocked from automated access. Status must be checked at https://www.congress.gov/bill/119th-congress/senate-bill/5548.
 
 ---
 
-## 5. DoW Section 1260H listing for InnoLight (June 2026)
+## F. Reuters: Reported FCC Draft on Chinese Optical Transceivers
 
 | Field | Value |
 |---|---|
-| Source | Federal Register, "Notice of Availability of Designation of Chinese Military Companies," 91 FR (Vol. 91, No. 111), p. 35194 for the entry |
-| URL | https://www.govinfo.gov/content/pkg/FR-2026-06-10/html/2026-11571.htm |
-| Type | primary (Federal Register notice of a Department determination) |
-| Doc. no. / docket | 2026-11571 / DOD-2026-OS-1288 |
-| Published | June 10, 2026 (signed June 5, filed June 8) |
-| Last verified | 2026-11-16 |
+| **Evidence tier** | REPORTED_DRAFT |
+| **Status** | UNVERIFIED |
+| **Source type** | Trade press (Reuters) |
+| **Article date** | August 4, 2026 (reported) |
+| **URL** | Not located |
 
-**Confirmed:** the notice has an entry for "Zhongji Innolight Co., Ltd. (Innolight)." The entry reads: "InnoLight is indirectly owned by SASAC and directly affiliated with MIIT (Section 1260H(g)(2)(B)(i)(I))." Statutory basis: Section 1260H of the FY2021 NDAA (Pub. L. 116-283). The notice states no separate effective date. The entry text above comes from my page-level read of the notice, so quote it from the source before relying on the exact wording.
+**Reported claims (from user brief; not independently confirmed):**
 
-**Also checked:**
+- FCC is drafting restrictions on new Chinese optical transceiver models.
+- Phase-in starting at the 3.2T generation, ramping ~2028–2029.
+- Possible exemption if ≥65% of bill-of-materials (BOM) value is U.S.-sourced.
+- InnoLight, Eoptolink, Dongshan Precision, and TFC are explicitly mentioned.
+- Note: these four companies do NOT appear on the FCC Covered List (confirmed in item C above).
 
-- Eoptolink, Dongshan and TFC did not appear in this notice's text.
-- A later notice, "Notice of Removal of Designated Chinese Military Company" (doc. 2026-22840, published 2026-11-10), removes only "WuXi AppTec Co., Ltd." after a court order. InnoLight is not mentioned, so InnoLight's listing was not removed by that notice. I did not search for any other later notice.
+**Verification attempt:** Reuters.com is blocked from automated web access. No FCC public document confirms a draft transceiver-model ban (FCC 26-50 does not propose one; the FNPRM proposes extending the component rule to software/firmware, not introducing a model ban). Status remains **UNVERIFIED**. Source URL is needed to validate.
 
-**Not the same as the Covered List.** A 1260H listing is a Department designation under a different statute (FY2021 NDAA Section 1260H). Nothing I read shows it placing a company on the FCC Covered List. Its legal consequences are not covered here.
+**Microsoft lobbying report (Nov 2026): UNVERIFIED.** No primary source located.
 
 ---
 
-## 6. Reuters, August 4, 2026: reported FCC draft on Chinese transceiver models
+## G. Analyst Estimates
 
 | Field | Value |
 |---|---|
-| Tier | `REPORTED_DRAFT` |
-| Status | **UNVERIFIED** |
-| Source type | Not established. Reuters would be news reporting (closest to trade press). It is not a primary source. |
-| URL | None found |
-| Last verified | 2026-11-16 (attempted; nothing confirmed) |
+| **Evidence tier** | ANALYST_ESTIMATE |
+| **Status** | UNVERIFIED |
+| **Source type** | Analyst (market research firms) |
 
-- `reuters.com` is blocked for this tool, and I had no search to locate the article. I did not read it, so I cannot confirm the headline, byline, date, the 3.2T reference, the ramp timing of about 2028-29, or the possible 65% US-sourced BOM exemption. Those details come from your brief only.
-- No primary source exists to check against. I found no FCC document announcing a ban on new Chinese transceiver models. FCC 26-50 mentions optical transceivers only in ¶22, ¶145 and footnote 245, and none of those is such a ban. The FCC has not confirmed the report, per your brief.
-- The preset should keep the label: "Reported by Reuters (Aug 4, 2026); FCC has not confirmed." Add the URL once you have it.
+**Counterpoint Research:**
+- InnoLight: ~27% of datacom transceiver market revenue (global) — **UNVERIFIED**
+- InnoLight and Eoptolink combined: ~60% of NVIDIA 800G optical transceiver volumes — **UNVERIFIED**
+- DSPs sourced from Broadcom/Marvell — **UNVERIFIED**
+- Thailand manufacturing lines may fall outside point-of-manufacture rules — **UNVERIFIED**
+
+**Cignal AI:**
+- InnoLight: $2.6B of $7.7B in global optical transceiver revenue (1Q26) — approximately 34% — **UNVERIFIED**
+
+**Methodology note:** Counterpoint estimate (27%) and Cignal estimate (34%) diverge significantly. The difference may reflect definitional choices (datacom only vs. all transceivers, revenue vs. units, different time periods). These estimates are adjustable inputs and should be verified against the original analyst reports.
+
+**Sources:**
+- Counterpoint Research: direct access to reports requires subscription; not independently verified here.
+- Cignal AI: direct access to reports requires subscription; not independently verified here.
 
 ---
 
-## Summary of verification status
+## OPEN QUESTIONS
 
-| # | Item | Status |
-|---|---|---|
-| 1 | FCC 26-50 order and Federal Register notices | Verified (effective Oct 13, 2026; definition and FNPRM scope quoted) |
-| 2 | Covered List (InnoLight, Eoptolink, Dongshan, TFC absent) | **UNVERIFIED for the live list.** Absent as of the March 23, 2026 list; FCC 26-50 fn. 245 supports absence for InnoLight. |
-| 3a | Router action DA 26-278 | Verified. The "2027-2028 approval expiry" claim is **UNVERIFIED**. |
-| 3b | Power inverter action | **UNVERIFIED. Not found.** |
-| 4 | S.5548 bill text and sponsors' press release | Verified (as introduced); congress.gov status page not read |
-| 5 | DoW 1260H listing for InnoLight (June 10, 2026) | Verified; not removed by the Nov 10 notice |
-| 6 | Reuters Aug 4, 2026 report | **UNVERIFIED** (`REPORTED_DRAFT`) |
+(Do not answer from memory; verify against primary sources.)
+
+1. **FCC equipment authorization scope for optical transceivers:**
+   - Do pluggable optical transceivers require FCC equipment authorization under current regulations?
+   - What constitutes a "new model" under 47 CFR Part 2?
+
+2. **Other regulatory lists:**
+   - Are InnoLight, Eoptolink, Dongshan Precision, or TFC on any of the following lists as of 2026-11-16?
+     - Commerce Department Entity List
+     - Treasury OFAC Specially Designated Nationals (SDN) List
+     - NSF National Security Sensitive Research and Development (NS-CMIC) list
+
+3. **Component rule cascade:**
+   - If InnoLight were added to the FCC Covered List, would the prohibition in 47 CFR 2.903 reach a Western-made switch that incorporates an InnoLight optical transceiver module?
+   - Would the transceiver be treated as a "logic-bearing hardware component produced by" InnoLight, or would it be "a device incorporating a component produced by" InnoLight (broader reading)?
+
+4. **Subsidiary and affiliate threshold:**
+   - What ownership percentage or control standard does the FCC use to determine whether a subsidiary or affiliate is "produced by" a Covered List entity under 47 CFR 2.902?
+   - Has the FCC issued guidance or case-law precedent on this point?
+
+---
+
+## SUMMARY OF VERIFICATION
+
+| Item | Tier | Status | Notes |
+|---|---|---|---|
+| **A. FCC 26-50 order and final rule** | ENACTED_LAW | VERIFIED | Adopted July 22, 2026; effective Oct 13, 2026; 47 CFR 2.902/2.903; hardware only; prospective; Covered List entities only. |
+| **B. DoW Section 1260H (June 2026)** | ENACTED_DESIGNATION | VERIFIED | Zhongji InnoLight listed; Eoptolink, Dongshan, TFC NOT listed. Entity count ~108 primary (PARTIAL); June 8/10, 2026. |
+| **C. FCC Covered List (four companies)** | ENACTED_LAW | PARTIAL | InnoLight, Eoptolink, Dongshan, TFC absent as of March 23 and July 22, 2026 snapshots. Live list (Nov 2026) UNVERIFIED. |
+| **D. Foreign-produced routers (DA 26-278)** | ENACTED_LAW | VERIFIED | March 23, 2026; added to Covered List; 18-month Conditional Approval terms. Approval expiry dates (2027–28) UNVERIFIED. |
+| **E. S.5548 optical transceiver bill** | PENDING_BILL | VERIFIED | Introduced Sept 24, 2026; McCormick, Cornyn, Fetterman, Gallego [check name]; federal NSS procurement restriction; five-year transition. Post-introduction status UNVERIFIED. |
+| **F. Reuters (Aug 4 & Nov 11, 2026)** | REPORTED_DRAFT | UNVERIFIED | 3.2T transceiver model ban, 65% US BOM exemption, Microsoft lobbying — no primary source located; Reuters.com blocked. |
+| **G. Analyst estimates** | ANALYST_ESTIMATE | UNVERIFIED | Counterpoint 27% (InnoLight datacom), Cignal 34% (InnoLight global optics 1Q26); sources require subscription access. |
+
+**One-line summary:** FCC 26-50 and DoW 1260H designations are VERIFIED as of their published dates; S.5548 bill text verified; Reuters reports, analyst estimates, and future regulatory action remain UNVERIFIED or blocked from access.

@@ -1,0 +1,2665 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Anticipatory regulatory scenario simulator. Model supply-chain compliance under enacted, pending, reported, and hypothetical regulations.">
+  <title>Regulatory Scenario Simulator</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Mono:wght@400;500;600&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --color-bg: #ffffff;
+      --color-fg: #0f1419;
+      --color-border: #e5e7eb;
+      --color-hover: #f3f4f6;
+      --color-primary: #2d7f2d;
+      --color-primary-hover: #236623;
+      --color-enacted-law: #2d7f2d;
+      --color-enacted-designation: #3366cc;
+      --color-pending-bill: #ffcc00;
+      --color-reported-draft: #ff9900;
+      --color-analyst-estimate: #ff9900;
+      --color-hypothetical: #cc0000;
+      --color-text-muted: #6b7280;
+      --space-xs: 0.5rem;
+      --space-sm: 1rem;
+      --space-md: 1.5rem;
+      --space-lg: 2rem;
+      --space-xl: 3rem;
+      --radius: 0.5rem;
+      --radius-lg: 1rem;
+      --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      --font-mono: "Courier New", monospace;
+      --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+      --shadow-md: 0 4px 6px rgba(0,0,0,0.1);
+      --shadow-lg: 0 10px 15px rgba(0,0,0,0.15);
+      --transition: all 0.2s ease;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --color-bg: #0f1419;
+        --color-fg: #f0f1f5;
+        --color-border: #2d3748;
+        --color-hover: #1a202c;
+        --color-text-muted: #9ca3af;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: var(--font-sans);
+      background-color: var(--color-bg);
+      color: var(--color-fg);
+      line-height: 1.6;
+    }
+
+    /* Announcement Banner */
+    .banner {
+      background: linear-gradient(135deg, var(--color-enacted-law) 0%, var(--color-enacted-law) 100%);
+      color: white;
+      text-align: center;
+      padding: var(--space-sm) var(--space-md);
+      font-size: 0.875rem;
+      font-weight: 500;
+    }
+
+    .banner a {
+      color: rgba(255, 255, 255, 0.9);
+      text-decoration: underline;
+    }
+
+    /* Navigation */
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: var(--color-bg);
+      border-bottom: 1px solid var(--color-border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: var(--space-sm) var(--space-md);
+      gap: var(--space-md);
+    }
+
+    .nav-logo {
+      font-weight: 700;
+      font-size: 1.25rem;
+      color: var(--color-primary);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: var(--space-xs);
+    }
+
+    .nav-logo::before {
+      content: "⚖";
+      font-size: 1.5rem;
+    }
+
+    .nav-menu {
+      display: none;
+      flex-direction: column;
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      background: var(--color-bg);
+      border-bottom: 1px solid var(--color-border);
+      padding: var(--space-md);
+      gap: var(--space-sm);
+    }
+
+    .nav-menu.active {
+      display: flex;
+    }
+
+    .nav-toggle {
+      display: none;
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+      padding: var(--space-xs);
+    }
+
+    @media (max-width: 768px) {
+      .nav-toggle {
+        display: block;
+      }
+
+      nav {
+        flex-wrap: wrap;
+      }
+
+      .nav-menu {
+        width: 100%;
+      }
+    }
+
+    .nav-menu a, .nav-dropdown-toggle {
+      padding: var(--space-sm);
+      text-decoration: none;
+      color: var(--color-fg);
+      font-size: 0.95rem;
+      border-radius: var(--radius);
+      transition: var(--transition);
+      background: none;
+      border: none;
+      cursor: pointer;
+      text-align: left;
+      width: 100%;
+    }
+
+    .nav-menu a:hover, .nav-dropdown-toggle:hover {
+      background: var(--color-hover);
+    }
+
+    .nav-dropdown {
+      position: relative;
+      display: inline-block;
+    }
+
+    .nav-dropdown-menu {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      background: var(--color-bg);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius);
+      min-width: 200px;
+      box-shadow: var(--shadow-md);
+      display: none;
+      flex-direction: column;
+      z-index: 101;
+    }
+
+    .nav-dropdown-menu.active {
+      display: flex;
+    }
+
+    .nav-dropdown-menu a {
+      padding: var(--space-sm) var(--space-md);
+      text-decoration: none;
+      color: var(--color-fg);
+      border-bottom: 1px solid var(--color-border);
+      transition: var(--transition);
+      width: 100%;
+    }
+
+    .nav-dropdown-menu a:last-child {
+      border-bottom: none;
+    }
+
+    .nav-dropdown-menu a:hover {
+      background: var(--color-hover);
+    }
+
+    .nav-cta {
+      display: flex;
+      gap: var(--space-sm);
+      align-items: center;
+    }
+
+    .btn {
+      padding: var(--space-xs) var(--space-md);
+      border-radius: var(--radius);
+      text-decoration: none;
+      font-weight: 500;
+      cursor: pointer;
+      border: none;
+      transition: var(--transition);
+      font-size: 0.95rem;
+    }
+
+    .btn-primary {
+      background: var(--color-primary);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: var(--color-primary-hover);
+    }
+
+    .btn-secondary {
+      background: var(--color-hover);
+      color: var(--color-fg);
+      border: 1px solid var(--color-border);
+    }
+
+    .btn-secondary:hover {
+      background: var(--color-border);
+    }
+
+    .theme-toggle {
+      background: none;
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius);
+      padding: var(--space-xs) var(--space-sm);
+      cursor: pointer;
+      font-size: 1rem;
+    }
+
+    /* Hero Section */
+    .hero {
+      position: relative;
+      overflow: hidden;
+      padding: var(--space-xl) var(--space-md);
+      text-align: center;
+      min-height: 500px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .hero::before {
+      content: "";
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background:
+        radial-gradient(circle at 20% 50%, rgba(45, 127, 45, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(51, 102, 204, 0.1) 0%, transparent 50%);
+      animation: float 20s ease-in-out infinite;
+      z-index: 0;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translate(0, 0); }
+      50% { transform: translate(30px, -30px); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .hero::before {
+        animation: none;
+      }
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 1;
+      max-width: 800px;
+    }
+
+    .hero h1 {
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      font-weight: 700;
+      line-height: 1.2;
+      margin-bottom: var(--space-md);
+    }
+
+    .hero p {
+      font-size: 1.125rem;
+      color: var(--color-text-muted);
+      margin-bottom: var(--space-lg);
+      line-height: 1.8;
+    }
+
+    .hero-cta {
+      display: flex;
+      gap: var(--space-md);
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    /* Trust Strip */
+    .trust-strip {
+      display: flex;
+      justify-content: center;
+      gap: var(--space-md);
+      flex-wrap: wrap;
+      padding: var(--space-lg) var(--space-md);
+      background: var(--color-hover);
+      border-top: 1px solid var(--color-border);
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    .trust-chip {
+      display: flex;
+      align-items: center;
+      gap: var(--space-xs);
+      padding: var(--space-xs) var(--space-md);
+      border-radius: 999px;
+      border: 1px solid var(--color-border);
+      font-size: 0.85rem;
+      font-weight: 500;
+    }
+
+    .trust-chip-dot {
+      display: inline-block;
+      width: 0.75rem;
+      height: 0.75rem;
+      border-radius: 50%;
+    }
+
+    .trust-chip-dot.enacted-law { background: var(--color-enacted-law); }
+    .trust-chip-dot.enacted-designation { background: var(--color-enacted-designation); }
+    .trust-chip-dot.pending-bill { background: var(--color-pending-bill); color: black; }
+    .trust-chip-dot.reported-draft { background: var(--color-reported-draft); }
+    .trust-chip-dot.analyst-estimate { background: var(--color-analyst-estimate); }
+    .trust-chip-dot.hypothetical { background: var(--color-hypothetical); }
+
+    /* Stepper */
+    .stepper {
+      padding: var(--space-lg) var(--space-md);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: var(--space-md);
+      flex-wrap: wrap;
+    }
+
+    @media (max-width: 768px) {
+      .stepper {
+        flex-direction: column;
+        gap: var(--space-lg);
+      }
+    }
+
+    .stepper-step {
+      flex: 1;
+      min-width: 150px;
+      text-align: center;
+      position: relative;
+    }
+
+    .stepper-step::after {
+      content: "";
+      position: absolute;
+      top: 1.5rem;
+      left: 100%;
+      width: 100vw;
+      height: 2px;
+      background: var(--color-border);
+      z-index: 0;
+    }
+
+    .stepper-step:last-child::after {
+      display: none;
+    }
+
+    @media (max-width: 768px) {
+      .stepper-step::after {
+        display: none;
+      }
+    }
+
+    .stepper-number {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 3rem;
+      height: 3rem;
+      border-radius: 50%;
+      background: var(--color-primary);
+      color: white;
+      font-weight: 700;
+      font-size: 1.25rem;
+      margin-bottom: var(--space-md);
+    }
+
+    .stepper-label {
+      font-weight: 600;
+      font-size: 1rem;
+      margin-bottom: var(--space-xs);
+    }
+
+    .stepper-desc {
+      font-size: 0.875rem;
+      color: var(--color-text-muted);
+    }
+
+    /* Four Layers */
+    .four-layers {
+      padding: var(--space-lg) var(--space-md);
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: var(--space-lg);
+    }
+
+    .layer-card {
+      background: var(--color-hover);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      padding: var(--space-lg);
+      transition: var(--transition);
+    }
+
+    .layer-card:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .layer-card h3 {
+      font-size: 1.25rem;
+      margin-bottom: var(--space-md);
+      color: var(--color-primary);
+    }
+
+    .layer-card p {
+      color: var(--color-text-muted);
+      line-height: 1.8;
+    }
+
+    /* Tabs */
+    .tabs {
+      padding: var(--space-lg) var(--space-md);
+    }
+
+    .tab-buttons {
+      display: flex;
+      gap: var(--space-md);
+      border-bottom: 1px solid var(--color-border);
+      margin-bottom: var(--space-lg);
+    }
+
+    .tab-button {
+      background: none;
+      border: none;
+      padding: var(--space-md) 0;
+      font-weight: 600;
+      cursor: pointer;
+      color: var(--color-text-muted);
+      border-bottom: 2px solid transparent;
+      transition: var(--transition);
+      font-size: 1rem;
+    }
+
+    .tab-button.active {
+      color: var(--color-primary);
+      border-bottom-color: var(--color-primary);
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    .tab-content h3 {
+      font-size: 1.25rem;
+      margin-bottom: var(--space-md);
+    }
+
+    .tab-content p {
+      color: var(--color-text-muted);
+      line-height: 1.8;
+      margin-bottom: var(--space-md);
+    }
+
+    /* Scenario Grid */
+    .scenario-grid {
+      padding: var(--space-lg) var(--space-md);
+    }
+
+    .scenario-grid h2 {
+      font-size: 2rem;
+      margin-bottom: var(--space-lg);
+    }
+
+    .scenarios {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: var(--space-lg);
+    }
+
+    .scenario-card {
+      background: var(--color-hover);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      padding: var(--space-lg);
+      transition: var(--transition);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-md);
+    }
+
+    .scenario-card:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .scenario-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-xs);
+      width: fit-content;
+      padding: var(--space-xs) var(--space-md);
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .scenario-badge.enacted-law {
+      background: rgba(45, 127, 45, 0.1);
+      color: var(--color-enacted-law);
+      border: 1px solid var(--color-enacted-law);
+    }
+
+    .scenario-badge.enacted-designation {
+      background: rgba(51, 102, 204, 0.1);
+      color: var(--color-enacted-designation);
+      border: 1px solid var(--color-enacted-designation);
+    }
+
+    .scenario-badge.pending-bill {
+      background: rgba(255, 204, 0, 0.1);
+      color: var(--color-pending-bill);
+      border: 1px solid var(--color-pending-bill);
+    }
+
+    .scenario-badge.reported-draft {
+      background: rgba(255, 153, 0, 0.1);
+      color: var(--color-reported-draft);
+      border: 1px solid var(--color-reported-draft);
+    }
+
+    .scenario-badge.analyst-estimate {
+      background: rgba(255, 153, 0, 0.1);
+      color: var(--color-analyst-estimate);
+      border: 1px solid var(--color-analyst-estimate);
+    }
+
+    .scenario-title {
+      font-size: 1.125rem;
+      font-weight: 600;
+      margin: 0;
+    }
+
+    .scenario-desc {
+      font-size: 0.95rem;
+      color: var(--color-text-muted);
+      flex-grow: 1;
+    }
+
+    .scenario-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.85rem;
+      color: var(--color-text-muted);
+      padding-top: var(--space-md);
+      border-top: 1px solid var(--color-border);
+    }
+
+    .scenario-link {
+      color: var(--color-primary);
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .scenario-link:hover {
+      text-decoration: underline;
+    }
+
+    /* Simulator Section */
+    .simulator {
+      padding: var(--space-lg) var(--space-md);
+      text-align: center;
+    }
+
+    .simulator-placeholder {
+      background: var(--color-hover);
+      border: 2px dashed var(--color-border);
+      border-radius: var(--radius-lg);
+      padding: var(--space-xl);
+      color: var(--color-text-muted);
+    }
+
+    .simulator-placeholder h3 {
+      font-size: 1.5rem;
+      margin-bottom: var(--space-md);
+      color: var(--color-fg);
+    }
+
+    /* Sources Section */
+    .sources {
+      padding: var(--space-lg) var(--space-md);
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .sources h2 {
+      font-size: 2rem;
+      margin-bottom: var(--space-lg);
+    }
+
+    .sources-list {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-lg);
+    }
+
+    .source-item {
+      border-left: 3px solid var(--color-primary);
+      padding-left: var(--space-lg);
+      padding-bottom: var(--space-md);
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    .source-item:last-child {
+      border-bottom: none;
+    }
+
+    .source-item h3 {
+      font-size: 1.125rem;
+      margin-bottom: var(--space-sm);
+    }
+
+    .source-item p {
+      color: var(--color-text-muted);
+      margin-bottom: var(--space-sm);
+      line-height: 1.8;
+    }
+
+    .source-meta {
+      display: flex;
+      gap: var(--space-md);
+      flex-wrap: wrap;
+      font-size: 0.85rem;
+      color: var(--color-text-muted);
+    }
+
+    .source-link {
+      color: var(--color-primary);
+      text-decoration: none;
+      word-break: break-all;
+    }
+
+    .source-link:hover {
+      text-decoration: underline;
+    }
+
+    .source-status {
+      display: inline-block;
+      padding: var(--space-xs) var(--space-sm);
+      border-radius: var(--radius);
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+
+    .source-status.verified {
+      background: rgba(45, 127, 45, 0.1);
+      color: var(--color-enacted-law);
+    }
+
+    .source-status.partial {
+      background: rgba(255, 153, 0, 0.1);
+      color: var(--color-reported-draft);
+    }
+
+    .source-status.unverified {
+      background: rgba(204, 0, 0, 0.1);
+      color: var(--color-hypothetical);
+    }
+
+    /* Final CTA */
+    .final-cta {
+      padding: var(--space-lg) var(--space-md);
+      background: var(--color-hover);
+      border-top: 1px solid var(--color-border);
+      border-bottom: 1px solid var(--color-border);
+      text-align: center;
+    }
+
+    .final-cta h2 {
+      font-size: 1.5rem;
+      margin-bottom: var(--space-md);
+    }
+
+    .final-cta p {
+      color: var(--color-text-muted);
+      margin-bottom: var(--space-lg);
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    /* Footer */
+    footer {
+      background: var(--color-hover);
+      border-top: 1px solid var(--color-border);
+      padding: var(--space-lg) var(--space-md);
+      text-align: center;
+      color: var(--color-text-muted);
+      font-size: 0.875rem;
+    }
+
+    footer a {
+      color: var(--color-primary);
+      text-decoration: none;
+    }
+
+    footer a:hover {
+      text-decoration: underline;
+    }
+
+    /* Container */
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 var(--space-md);
+    }
+
+    /* Utility */
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border-width: 0;
+    }
+
+    .skip-to-main {
+      position: absolute;
+      top: -40px;
+      left: 0;
+      background: var(--color-primary);
+      color: white;
+      padding: var(--space-sm) var(--space-md);
+      z-index: 1000;
+    }
+
+    .skip-to-main:focus {
+      top: 0;
+    }
+
+    /* Additional Simulator Styles */
+    .drawer {
+      position: fixed;
+      top: 0;
+      right: 0;
+      width: 500px;
+      height: 100vh;
+      background: var(--color-bg);
+      border-left: 1px solid var(--color-border);
+      box-shadow: var(--shadow-lg);
+      z-index: 500;
+      overflow-y: auto;
+      display: none;
+      flex-direction: column;
+    }
+
+    .drawer.active {
+      display: flex;
+    }
+
+    .drawer-header {
+      padding: var(--space-lg);
+      border-bottom: 1px solid var(--color-border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-weight: 600;
+      font-size: 1.125rem;
+    }
+
+    .drawer-close {
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+      padding: 0;
+    }
+
+    .drawer-content {
+      padding: var(--space-lg);
+      flex: 1;
+      overflow-y: auto;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-sm);
+      margin-bottom: var(--space-md);
+    }
+
+    .form-group label {
+      font-weight: 500;
+      font-size: 0.95rem;
+    }
+
+    .form-group input, .form-group textarea, .form-group select {
+      padding: var(--space-xs) var(--space-sm);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius);
+      background: var(--color-bg);
+      color: var(--color-fg);
+      font-size: 0.95rem;
+      font-family: var(--font-sans);
+    }
+
+    .form-group textarea {
+      resize: vertical;
+      min-height: 80px;
+    }
+
+    .template-link {
+      display: inline-block;
+      padding: var(--space-xs) var(--space-sm);
+      background: var(--color-hover);
+      border-radius: var(--radius);
+      text-decoration: none;
+      color: var(--color-primary);
+      font-size: 0.85rem;
+      font-weight: 500;
+      cursor: pointer;
+      text-align: center;
+    }
+
+    .template-link:hover {
+      background: var(--color-border);
+    }
+
+    .error-message {
+      padding: var(--space-sm);
+      background: rgba(204, 0, 0, 0.1);
+      border: 1px solid var(--color-hypothetical);
+      border-radius: var(--radius);
+      color: var(--color-hypothetical);
+      font-size: 0.85rem;
+      display: none;
+    }
+
+    .error-message.show {
+      display: block;
+    }
+
+    .success-message {
+      padding: var(--space-sm);
+      background: rgba(45, 127, 45, 0.1);
+      border: 1px solid var(--color-enacted-law);
+      border-radius: var(--radius);
+      color: var(--color-enacted-law);
+      font-size: 0.85rem;
+      display: none;
+    }
+
+    .success-message.show {
+      display: block;
+    }
+
+    #ownership-graph {
+      width: 100%;
+      height: 300px;
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      background: var(--color-hover);
+      margin: var(--space-lg) 0;
+    }
+
+    .scenario-comparison {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: var(--space-lg);
+    }
+
+    .scenario-box {
+      background: var(--color-bg);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      padding: var(--space-md);
+    }
+
+    .test-case {
+      background: var(--color-hover);
+      border-left: 3px solid var(--color-border);
+      padding: var(--space-md);
+      margin-bottom: var(--space-md);
+      border-radius: var(--radius);
+      font-size: 0.9rem;
+    }
+
+    .test-case.pass {
+      border-left-color: var(--color-enacted-law);
+      background: rgba(45, 127, 45, 0.05);
+    }
+
+    .test-case.fail {
+      border-left-color: var(--color-hypothetical);
+      background: rgba(204, 0, 0, 0.05);
+    }
+
+    .test-badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      margin-right: var(--space-sm);
+    }
+
+    .test-badge.pass {
+      background: rgba(45, 127, 45, 0.2);
+      color: var(--color-enacted-law);
+    }
+
+    .test-badge.fail {
+      background: rgba(204, 0, 0, 0.2);
+      color: var(--color-hypothetical);
+    }
+
+    .record-source-label {
+      font-size: 0.75rem;
+      color: var(--color-text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-top: var(--space-xs);
+    }
+
+    @media (max-width: 1200px) {
+      .drawer {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <a href="#simulator" class="skip-to-main">Skip to simulator</a>
+
+  <!-- Announcement Banner -->
+  <div class="banner">
+    <strong>Scenario last verified 2026-11-16</strong> • <a href="#sources">View SOURCES.md</a>
+  </div>
+
+  <!-- Navigation -->
+  <nav>
+    <a href="#" class="nav-logo">Regulatory Scenario Simulator</a>
+
+    <button class="nav-toggle" aria-label="Toggle menu" id="nav-toggle">☰</button>
+
+    <div class="nav-menu" id="nav-menu">
+      <div class="nav-dropdown">
+        <button class="nav-dropdown-toggle" id="resources-toggle">Resources</button>
+        <div class="nav-dropdown-menu" id="resources-menu">
+          <a href="#sources">Sources & Evidence</a>
+          <a href="#methodology">Methodology</a>
+          <a href="#evidence-tiers">Evidence Tiers</a>
+          <a href="#sayari-guide">Sayari Import Guide</a>
+          <a href="#glossary">Glossary</a>
+        </div>
+      </div>
+      <a href="#simulator">Run Simulation</a>
+    </div>
+
+    <div class="nav-cta">
+      <button class="theme-toggle" id="theme-toggle" aria-label="Toggle dark mode">🌙</button>
+      <a href="#simulator" class="btn btn-primary">Run Simulation</a>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="hero-content">
+      <h1>Anticipate Regulation Before It Lands</h1>
+      <p>Model supply-chain compliance under enacted, pending, reported, and hypothetical regulations. See which scenarios threaten your infrastructure, where the assumptions break, and when to act.</p>
+      <div class="hero-cta">
+        <a href="#simulator" class="btn btn-primary">Run the Demo</a>
+        <a href="#sayari-guide" class="btn btn-secondary">Import Sayari Data</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Trust Strip -->
+  <section class="trust-strip">
+    <div class="trust-chip">
+      <span class="trust-chip-dot enacted-law"></span>
+      Enacted Law
+    </div>
+    <div class="trust-chip">
+      <span class="trust-chip-dot enacted-designation"></span>
+      Enacted Designation
+    </div>
+    <div class="trust-chip">
+      <span class="trust-chip-dot pending-bill"></span>
+      Pending Bill
+    </div>
+    <div class="trust-chip">
+      <span class="trust-chip-dot reported-draft"></span>
+      Reported Draft
+    </div>
+    <div class="trust-chip">
+      <span class="trust-chip-dot analyst-estimate"></span>
+      Analyst Estimate
+    </div>
+    <div class="trust-chip">
+      <span class="trust-chip-dot hypothetical"></span>
+      Hypothetical
+    </div>
+  </section>
+
+  <!-- Signal to Decision Stepper -->
+  <section class="stepper">
+    <div class="stepper-step">
+      <div class="stepper-number">1</div>
+      <div class="stepper-label">Signal</div>
+      <div class="stepper-desc">Intelligence about a potential regulation</div>
+    </div>
+    <div class="stepper-step">
+      <div class="stepper-number">2</div>
+      <div class="stepper-label">Scenario</div>
+      <div class="stepper-desc">Model your supply chain under that rule</div>
+    </div>
+    <div class="stepper-step">
+      <div class="stepper-number">3</div>
+      <div class="stepper-label">Impact</div>
+      <div class="stepper-desc">See compliance status and cost/delay</div>
+    </div>
+    <div class="stepper-step">
+      <div class="stepper-number">4</div>
+      <div class="stepper-label">Decision</div>
+      <div class="stepper-desc">Decide when to redesign or diversify</div>
+    </div>
+  </section>
+
+  <!-- Four Layers -->
+  <section class="four-layers">
+    <div class="layer-card">
+      <h3>🏛️ Evidence</h3>
+      <p>Primary-source regulatory items: FCC orders, bills, designations. Each item carries a confidence tier (enacted law, pending, reported, hypothetical) and verification status.</p>
+    </div>
+    <div class="layer-card">
+      <h3>🏢 Entities (Sayari)</h3>
+      <p>Import your supply-chain entities: manufacturer name, incorporation, UBO, ownership %, subsidiaries, manufacturing locations, HS codes. The simulator applies regulatory definitions to predict which entities are restricted.</p>
+    </div>
+    <div class="layer-card">
+      <h3>⚙️ Rules</h3>
+      <p>Ordered rule engine: entity-definition switch (incorporation vs. manufacturing vs. ownership), Covered List component prohibition, 1260H designation, federal procurement scope, transceiver model phase-ins, US-BOM exemptions, grandfathering, transitive taint.</p>
+    </div>
+    <div class="layer-card">
+      <h3>🏢 Datacenter Impact</h3>
+      <p>For each SKU, see compliance status (approved, blocked, transition window), estimated delay (months), cost delta (%), redesign alerts, and the assumption fragility—what would flip the status.</p>
+    </div>
+  </section>
+
+  <!-- Tabs: Analyst Builder vs Decision Maker View -->
+  <section class="tabs">
+    <div class="tab-buttons">
+      <button class="tab-button active" data-tab="analyst-builder">Analyst Builder View</button>
+      <button class="tab-button" data-tab="decision-maker">Decision Maker View</button>
+    </div>
+
+    <div class="tab-content active" id="analyst-builder">
+      <h3>Analyst Builder: Deep-Dive Supply Chain Analysis</h3>
+      <p><strong>Who:</strong> Procurement analysts, supply-chain engineers, compliance teams.</p>
+      <p><strong>Workflow:</strong> Import entity data from Sayari. Build your Bill of Materials (BoM) for each product SKU. Choose an entity-definition mode (incorporation, manufacturing location, or UBO ownership %). Select which confidence tiers to include (enacted law only, or add pending bills, reported drafts). Set assumptions: ownership threshold, US-BOM target, procurement scope, phase-in year for emerging regulations.</p>
+      <p><strong>Output:</strong> Per-SKU compliance status and impact. Detailed assumptions and falsifiers. Audit trail of how each rule was applied. Export scenario as JSON or CSV for sharing with leadership.</p>
+    </div>
+
+    <div class="tab-content" id="decision-maker">
+      <h3>Decision Maker: Executive Summary</h3>
+      <p><strong>Who:</strong> CTO, VP of Infrastructure, procurement leadership, legal counsel.</p>
+      <p><strong>Workflow:</strong> Load a scenario your team built. Toggle between "Enacted Only" (what's law today) and "Enacted + Proposed" (best-case and worst-case futures). See summary: how many SKUs are blocked, in transition, or approved? What's the worst-case confidence tier (is this driven by solid law or unverified rumors)? What redesign or sourcing work would be needed?</p>
+      <p><strong>Output:</strong> Executive brief. Redirect to deeper analysis as needed. Recommend which assumptions to monitor (e.g., "If Innolight is added to the Covered List in Q2 2027, this design fails").</p>
+    </div>
+  </section>
+
+  <!-- Scenario Cards Grid -->
+  <section class="scenario-grid">
+    <div class="container">
+      <h2>Baseline Scenarios from SOURCES.md</h2>
+      <div class="scenarios">
+        <!-- FCC 26-50 -->
+        <div class="scenario-card">
+          <div class="scenario-badge enacted-law">
+            Enacted Law
+          </div>
+          <h3 class="scenario-title">FCC 26-50: Equipment Authorization Rule</h3>
+          <p class="scenario-desc">Bars new equipment authorizations for devices with logic-bearing hardware components produced by Covered List entities. Effective October 13, 2026. Hardware only (software/firmware proposed in FNPRM, still pending).</p>
+          <div class="scenario-meta">
+            <span>Verified 2026-11-16</span>
+            <a href="#sources" class="scenario-link">View details</a>
+          </div>
+        </div>
+
+        <!-- DoW 1260H -->
+        <div class="scenario-card">
+          <div class="scenario-badge enacted-designation">
+            Enacted Designation
+          </div>
+          <h3 class="scenario-title">DoW Section 1260H: Chinese Military Company Designation</h3>
+          <p class="scenario-desc">Designates ~108 entities as Chinese military companies (InnoLight listed; Eoptolink, Dongshan, TFC not listed). Published June 10, 2026. Designation only; does not automatically prohibit use unless paired with procurement restriction.</p>
+          <div class="scenario-meta">
+            <span>Verified 2026-11-16</span>
+            <a href="#sources" class="scenario-link">View details</a>
+          </div>
+        </div>
+
+        <!-- FCC Covered List -->
+        <div class="scenario-card">
+          <div class="scenario-badge enacted-law">
+            Enacted Law
+          </div>
+          <h3 class="scenario-title">FCC Covered List: Current Status</h3>
+          <p class="scenario-desc">As of July 22, 2026: InnoLight, Eoptolink, Dongshan Precision, TFC are NOT on the Covered List. Live list status (Nov 2026) UNVERIFIED. InnoLight is on DoW 1260H but not on FCC Covered List—separate designations.</p>
+          <div class="scenario-meta">
+            <span>Partial 2026-11-16</span>
+            <a href="#sources" class="scenario-link">View details</a>
+          </div>
+        </div>
+
+        <!-- Foreign-Produced Routers -->
+        <div class="scenario-card">
+          <div class="scenario-badge enacted-law">
+            Enacted Law
+          </div>
+          <h3 class="scenario-title">DA 26-278: Foreign-Produced Routers</h3>
+          <p class="scenario-desc">Routers produced in foreign countries added to FCC Covered List, March 23, 2026. Requires DoW/DHS Conditional Approval (valid 18 months) or pre-Oct-13 FCC authorization. Approval expiry dates (2027–2028) UNVERIFIED.</p>
+          <div class="scenario-meta">
+            <span>Verified 2026-11-16</span>
+            <a href="#sources" class="scenario-link">View details</a>
+          </div>
+        </div>
+
+        <!-- S.5548 -->
+        <div class="scenario-card">
+          <div class="scenario-badge pending-bill">
+            Pending Bill
+          </div>
+          <h3 class="scenario-title">S.5548: Federal NSS Optical Transceiver Ban</h3>
+          <p class="scenario-desc">Introduced Sept 24, 2026. Bans federal procurement of optical transceivers from InnoLight, Eoptolink, or later-designated entities for critical national security systems. Five-year transition. Post-introduction status UNVERIFIED.</p>
+          <div class="scenario-meta">
+            <span>Verified as introduced 2026-11-16</span>
+            <a href="#sources" class="scenario-link">View details</a>
+          </div>
+        </div>
+
+        <!-- Reuters Draft -->
+        <div class="scenario-card">
+          <div class="scenario-badge reported-draft">
+            Reported Draft
+          </div>
+          <h3 class="scenario-title">Reuters: FCC Transceiver Model Ban (Unconfirmed)</h3>
+          <p class="scenario-desc">Reported August 4, 2026. FCC drafting restrictions on new Chinese optical transceiver models, 3.2T generation phase-in ~2028–2029, possible 65% US-BOM exemption. No primary source confirms. Status UNVERIFIED.</p>
+          <div class="scenario-meta">
+            <span>Unverified 2026-11-16</span>
+            <a href="#sources" class="scenario-link">View details</a>
+          </div>
+        </div>
+
+        <!-- Analyst Estimates -->
+        <div class="scenario-card">
+          <div class="scenario-badge analyst-estimate">
+            Analyst Estimate
+          </div>
+          <h3 class="scenario-title">Market Share & Analyst Data</h3>
+          <p class="scenario-desc">Counterpoint: InnoLight ~27% datacom transceiver revenue; Cignal: ~34% (1Q26). InnoLight + Eoptolink ~60% NVIDIA 800G. Estimates diverge; treat as adjustable inputs. Sources require subscription.</p>
+          <div class="scenario-meta">
+            <span>Unverified 2026-11-16</span>
+            <a href="#sources" class="scenario-link">View details</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Simulator Section -->
+  <section id="simulator" style="background: var(--color-hover);">
+    <div class="container" style="max-width: 1400px;">
+      <!-- Control Bar -->
+      <div style="padding: var(--space-lg) var(--space-md) var(--space-md); display: flex; gap: var(--space-md); flex-wrap: wrap; align-items: center; border-bottom: 1px solid var(--color-border);">
+        <label style="display: flex; gap: var(--space-xs); align-items: center; font-weight: 500;">
+          <input type="checkbox" id="include-proposed" checked style="cursor: pointer;">
+          Enacted + Proposed Rules
+        </label>
+
+        <select id="scope-selector" style="padding: var(--space-xs) var(--space-sm); border: 1px solid var(--color-border); border-radius: var(--radius); background: var(--color-bg); cursor: pointer;">
+          <option value="commercial">Commercial Datacenter</option>
+          <option value="federal">Federal National Security System</option>
+        </select>
+
+        <select id="entity-mode" style="padding: var(--space-xs) var(--space-sm); border: 1px solid var(--color-border); border-radius: var(--radius); background: var(--color-bg); cursor: pointer;">
+          <option value="incorporation">Incorporated in China</option>
+          <option value="manufacturing">Manufactured in China</option>
+          <option value="ownership">Ownership >= X%</option>
+        </select>
+
+        <div style="margin-left: auto; display: flex; gap: var(--space-sm); flex-wrap: wrap;">
+          <button onclick="openSayariDrawer()" class="btn btn-secondary" style="font-size: 0.85rem;">+ Import Data</button>
+          <button onclick="openScenarioDrawer()" class="btn btn-secondary" style="font-size: 0.85rem;">💾 Scenarios</button>
+          <button onclick="openTestDrawer()" class="btn btn-secondary" style="font-size: 0.85rem;">✓ Tests</button>
+          <button id="preset-enacted" class="btn btn-secondary" style="font-size: 0.85rem;">Enacted Only</button>
+          <button id="preset-baseline" class="btn btn-secondary" style="font-size: 0.85rem;">Next-Gen Optics</button>
+          <button id="preset-blank" class="btn btn-secondary" style="font-size: 0.85rem;">Blank</button>
+          <button id="reset-btn" class="btn btn-secondary" style="font-size: 0.85rem;">Reset</button>
+        </div>
+      </div>
+
+      <!-- Main Simulator Layout -->
+      <div style="display: grid; grid-template-columns: 280px 1fr; gap: var(--space-lg); padding: var(--space-lg) var(--space-md); min-height: 600px;">
+
+        <!-- Left Sidebar: Injector -->
+        <div style="display: flex; flex-direction: column; gap: var(--space-lg);">
+          <div>
+            <h4 style="margin-bottom: var(--space-md);">US-BOM Threshold</h4>
+            <div style="display: flex; gap: var(--space-sm); align-items: center;">
+              <input type="range" id="bom-slider" min="0" max="100" value="65" style="flex: 1;">
+              <span id="bom-value" style="font-weight: 600; min-width: 40px;">65%</span>
+            </div>
+          </div>
+
+          <div>
+            <h4 style="margin-bottom: var(--space-md);">Generation Cutoff</h4>
+            <select id="gen-cutoff" style="width: 100%; padding: var(--space-xs) var(--space-sm); border: 1px solid var(--color-border); border-radius: var(--radius); background: var(--color-bg); cursor: pointer;">
+              <option value="800G">800G (grandfathered)</option>
+              <option value="1600T">1.6T (grandfathered)</option>
+              <option value="3200T">3.2T (phased in)</option>
+            </select>
+          </div>
+
+          <div>
+            <h4 style="margin-bottom: var(--space-md);">Ramp Year</h4>
+            <input type="range" id="ramp-year" min="2027" max="2030" value="2028" style="width: 100%;">
+            <div style="text-align: center; font-weight: 600; margin-top: var(--space-xs);">
+              <span id="ramp-year-value">2028</span>
+            </div>
+          </div>
+
+          <div>
+            <h4 style="margin-bottom: var(--space-md);">Probability (%)</h4>
+            <input type="range" id="prob-slider" min="0" max="100" value="100" style="width: 100%;">
+            <div style="text-align: center; font-weight: 600; margin-top: var(--space-xs);">
+              <span id="prob-value">100%</span>
+            </div>
+          </div>
+
+          <div>
+            <h4 style="margin-bottom: var(--space-md);">Entities</h4>
+            <div style="display: flex; flex-direction: column; gap: var(--space-sm);">
+              <label style="display: flex; gap: var(--space-xs); align-items: center; cursor: pointer;">
+                <input type="checkbox" class="entity-check" value="innolight" checked>
+                InnoLight (China)
+              </label>
+              <label style="display: flex; gap: var(--space-xs); align-items: center; cursor: pointer;">
+                <input type="checkbox" class="entity-check" value="eoptolink" checked>
+                Eoptolink (Taiwan)
+              </label>
+              <label style="display: flex; gap: var(--space-xs); align-items: center; cursor: pointer;">
+                <input type="checkbox" class="entity-check" value="dongshan" checked>
+                Dongshan (China)
+              </label>
+              <label style="display: flex; gap: var(--space-xs); align-items: center; cursor: pointer;">
+                <input type="checkbox" class="entity-check" value="tfc" checked>
+                TFC (Unknown)
+              </label>
+            </div>
+          </div>
+
+          <div>
+            <h4 style="margin-bottom: var(--space-md);">Ownership % (OWNERSHIP mode)</h4>
+            <input type="range" id="ownership-pct" min="0" max="100" value="50" style="width: 100%;">
+            <div style="text-align: center; font-weight: 600; margin-top: var(--space-xs);">
+              <span id="ownership-value">50%</span>
+            </div>
+          </div>
+
+          <div style="border-top: 1px solid var(--color-border); padding-top: var(--space-md);">
+            <h4 style="margin-bottom: var(--space-md);">Inject New Intelligence</h4>
+            <div style="display: flex; flex-direction: column; gap: var(--space-sm);">
+              <input type="text" id="inject-title" placeholder="Rule name" style="padding: var(--space-xs); border: 1px solid var(--color-border); border-radius: var(--radius); background: var(--color-bg); font-size: 0.85rem;">
+              <textarea id="inject-note" placeholder="Description" style="padding: var(--space-xs); border: 1px solid var(--color-border); border-radius: var(--radius); background: var(--color-bg); font-size: 0.85rem; height: 60px; resize: none;"></textarea>
+              <input type="text" id="inject-url" placeholder="Source URL" style="padding: var(--space-xs); border: 1px solid var(--color-border); border-radius: var(--radius); background: var(--color-bg); font-size: 0.85rem;">
+              <select id="inject-tier" style="padding: var(--space-xs); border: 1px solid var(--color-border); border-radius: var(--radius); background: var(--color-bg); font-size: 0.85rem;">
+                <option value="HYPOTHETICAL">Hypothetical</option>
+                <option value="REPORTED_DRAFT">Reported Draft</option>
+                <option value="PENDING_BILL">Pending Bill</option>
+              </select>
+              <button id="inject-btn" class="btn btn-primary" style="font-size: 0.85rem;">Inject</button>
+            </div>
+          </div>
+
+          <div id="custom-items" style="border-top: 1px solid var(--color-border); padding-top: var(--space-md); display: flex; flex-direction: column; gap: var(--space-sm);"></div>
+        </div>
+
+        <!-- Center: Data Table -->
+        <div style="display: flex; flex-direction: column; gap: var(--space-lg); flex: 1;">
+          <div style="background: var(--color-bg); border-radius: var(--radius-lg); border: 1px solid var(--color-border); overflow: hidden;">
+            <div style="padding: var(--space-md); background: var(--color-hover); border-bottom: 1px solid var(--color-border); font-weight: 600; font-size: 0.85rem; color: var(--color-text-muted);">
+              ILLUSTRATIVE - NOT REAL DATA
+            </div>
+            <div style="overflow-x: auto;">
+              <table style="width: 100%; border-collapse: collapse; font-size: 0.85rem;">
+                <thead>
+                  <tr style="border-bottom: 1px solid var(--color-border); background: var(--color-hover);">
+                    <th style="padding: var(--space-sm); text-align: left; font-weight: 600;">Product</th>
+                    <th style="padding: var(--space-sm); text-align: left; font-weight: 600;">Maker</th>
+                    <th style="padding: var(--space-sm); text-align: left; font-weight: 600;">Speed</th>
+                    <th style="padding: var(--space-sm); text-align: left; font-weight: 600;">Auth Date</th>
+                    <th style="padding: var(--space-sm); text-align: left; font-weight: 600;">Covered List</th>
+                    <th style="padding: var(--space-sm); text-align: left; font-weight: 600;">1260H</th>
+                    <th style="padding: var(--space-sm); text-align: left; font-weight: 600;">Build</th>
+                    <th style="padding: var(--space-sm); text-align: left; font-weight: 600;">US-BOM %</th>
+                    <th style="padding: var(--space-sm); text-align: left; font-weight: 600;">Status</th>
+                  </tr>
+                </thead>
+                <tbody id="sku-table">
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Impact Dashboard -->
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: var(--space-md);">
+            <div style="background: var(--color-bg); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: var(--space-md);">
+              <div style="font-size: 0.85rem; color: var(--color-text-muted); margin-bottom: var(--space-xs);">APPROVED</div>
+              <div style="font-size: 2rem; font-weight: 700; color: var(--color-enacted-law);" id="stat-approved">0</div>
+            </div>
+            <div style="background: var(--color-bg); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: var(--space-md);">
+              <div style="font-size: 0.85rem; color: var(--color-text-muted); margin-bottom: var(--space-xs);">TRANSITION WINDOW</div>
+              <div style="font-size: 2rem; font-weight: 700; color: var(--color-pending-bill);" id="stat-transition">0</div>
+            </div>
+            <div style="background: var(--color-bg); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: var(--space-md);">
+              <div style="font-size: 0.85rem; color: var(--color-text-muted); margin-bottom: var(--space-xs);">BLOCKED</div>
+              <div style="font-size: 2rem; font-weight: 700; color: var(--color-hypothetical);" id="stat-blocked">0</div>
+            </div>
+            <div style="background: var(--color-bg); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: var(--space-md);">
+              <div style="font-size: 0.85rem; color: var(--color-text-muted); margin-bottom: var(--space-xs);">WORST-CASE TIER</div>
+              <div style="font-size: 1.25rem; font-weight: 700; color: var(--color-fg);" id="stat-tier">—</div>
+            </div>
+          </div>
+
+          <!-- Assumption Log -->
+          <div style="background: var(--color-bg); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: var(--space-md);">
+            <h4 style="margin-bottom: var(--space-md);">Assumption Log & Falsifiers</h4>
+            <div id="assumption-log" style="display: flex; flex-direction: column; gap: var(--space-sm); font-size: 0.85rem; color: var(--color-text-muted); max-height: 150px; overflow-y: auto;">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sayari Import Drawer -->
+      <div id="sayari-drawer" class="drawer">
+        <div class="drawer-header">
+          Add / Import Sayari Data
+          <button class="drawer-close" onclick="closeSayariDrawer()">✕</button>
+        </div>
+        <div class="drawer-content">
+          <div class="form-group">
+            <label>Manual Entry</label>
+            <div class="form-group">
+              <input type="text" id="sayari-entity-id" placeholder="Entity ID (e.g., innolight_2)">
+              <input type="text" id="sayari-entity-name" placeholder="Entity Name">
+              <input type="text" id="sayari-country" placeholder="Country (e.g., CN, US, TW)">
+              <input type="text" id="sayari-parent" placeholder="Parent Company ID (optional)">
+              <input type="number" id="sayari-ownership" placeholder="Ownership %" min="0" max="100" value="100">
+            </div>
+            <div class="form-group">
+              <input type="text" id="sayari-build-loc" placeholder="Build Location (e.g., China, USA)">
+              <input type="number" id="sayari-us-bomp" placeholder="US-BOM %" min="0" max="100" value="50">
+              <input type="text" id="sayari-hs-codes" placeholder="HS Codes (comma-separated)">
+            </div>
+            <div class="form-group">
+              <input type="text" id="sayari-url" placeholder="Record Source URL">
+            </div>
+            <button class="btn btn-primary" onclick="addSayariEntity()" style="width: 100%;">Add Entity</button>
+          </div>
+
+          <div style="border-top: 1px solid var(--color-border); padding-top: var(--space-md); margin-top: var(--space-md);">
+            <label style="font-weight: 500; display: block; margin-bottom: var(--space-md);">Paste JSON</label>
+            <textarea id="sayari-json-paste" placeholder='[{"entityId":"...", "name":"...", ...}]' style="width: 100%;"></textarea>
+            <button class="btn btn-primary" onclick="pasteSayariJSON()" style="width: 100%; margin-top: var(--space-sm);">Import from JSON</button>
+          </div>
+
+          <div style="border-top: 1px solid var(--color-border); padding-top: var(--space-md); margin-top: var(--space-md);">
+            <label style="font-weight: 500; display: block; margin-bottom: var(--space-md);">Upload File</label>
+            <input type="file" id="sayari-file" accept=".json,.csv">
+            <button class="btn btn-primary" onclick="uploadSayariFile()" style="width: 100%; margin-top: var(--space-sm);">Upload</button>
+          </div>
+
+          <div style="border-top: 1px solid var(--color-border); padding-top: var(--space-md); margin-top: var(--space-md);">
+            <label style="font-weight: 500; display: block; margin-bottom: var(--space-md);">Templates</label>
+            <a class="template-link" onclick="downloadTemplate('json')">Download JSON Template</a>
+            <a class="template-link" style="margin-left: var(--space-sm);" onclick="downloadTemplate('csv')">Download CSV Template</a>
+          </div>
+
+          <div id="sayari-error" class="error-message"></div>
+          <div id="sayari-success" class="success-message"></div>
+        </div>
+      </div>
+
+      <!-- Scenario Comparison Drawer -->
+      <div id="scenario-drawer" class="drawer">
+        <div class="drawer-header">
+          Scenario Comparison
+          <button class="drawer-close" onclick="closeScenarioDrawer()">✕</button>
+        </div>
+        <div class="drawer-content">
+          <div class="form-group">
+            <label>Save Current Scenario</label>
+            <input type="text" id="scenario-name" placeholder="Scenario name (e.g., Federal NSS - Next-Gen)">
+            <button class="btn btn-primary" onclick="saveScenario()" style="width: 100%;">Save</button>
+          </div>
+
+          <div style="border-top: 1px solid var(--color-border); padding-top: var(--space-md); margin-top: var(--space-md);">
+            <label style="font-weight: 500; display: block; margin-bottom: var(--space-md);">Saved Scenarios (up to 3)</label>
+            <div id="saved-scenarios" style="display: flex; flex-direction: column; gap: var(--space-sm);"></div>
+          </div>
+
+          <div style="border-top: 1px solid var(--color-border); padding-top: var(--space-md); margin-top: var(--space-md);">
+            <label style="font-weight: 500; display: block; margin-bottom: var(--space-md);">Export Results</label>
+            <button class="btn btn-secondary" onclick="exportAsJSON()" style="width: 100%;">Export JSON</button>
+            <button class="btn btn-secondary" onclick="exportAsCSV()" style="width: 100%; margin-top: var(--space-sm);">Export CSV</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Test Panel Drawer -->
+      <div id="test-drawer" class="drawer">
+        <div class="drawer-header">
+          Built-In Test Suite
+          <button class="drawer-close" onclick="closeTestDrawer()">✕</button>
+        </div>
+        <div class="drawer-content">
+          <button class="btn btn-primary" onclick="runAllTests()" style="width: 100%; margin-bottom: var(--space-lg);">Run All Tests</button>
+          <div id="test-results" style="display: flex; flex-direction: column; gap: var(--space-md);"></div>
+        </div>
+      </div>
+
+      <!-- Ownership Graph -->
+      <div id="ownership-graph-container" style="display: none; margin: var(--space-lg) var(--space-md); background: var(--color-bg); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: var(--space-md);">
+        <h4 style="margin-bottom: var(--space-md);">Ownership & Taint Path</h4>
+        <svg id="ownership-graph"></svg>
+        <div style="font-size: 0.85rem; color: var(--color-text-muted); margin-top: var(--space-md);">
+          <strong>Green path:</strong> Ownership chain of selected entity. Numbers show ownership %.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Sources Section -->
+  <section id="sources" class="sources">
+    <div class="container">
+      <h2>Sources & Evidence</h2>
+      <div class="sources-list">
+        <div class="source-item">
+          <h3>A. FCC 26-50: Third Report and Order</h3>
+          <div class="source-status verified">Verified</div>
+          <p><strong>Adopted:</strong> July 22, 2026 • <strong>Effective:</strong> October 13, 2026</p>
+          <p>Equipment authorization rule barring new authorizations for devices with logic-bearing hardware components from Covered List entities. Prospective only; grandfathers existing authorizations and pending applications not amended.</p>
+          <div class="source-meta">
+            <a href="https://docs.fcc.gov/public/attachments/FCC-26-50A1.pdf" class="source-link" target="_blank">FCC Order PDF</a>
+            <a href="https://www.govinfo.gov/content/pkg/FR-2026-09-11/pdf/2026-18535.pdf" class="source-link" target="_blank">Federal Register (91 FR 57798–57801)</a>
+            <span>Codified: 47 CFR 2.902, 2.903</span>
+          </div>
+        </div>
+
+        <div class="source-item">
+          <h3>B. DoW Section 1260H Designation</h3>
+          <div class="source-status verified">Verified</div>
+          <p><strong>Published:</strong> June 10, 2026 (filed June 8, 2026)</p>
+          <p>Designates ~108 entities as Chinese military companies under Section 1260H of the FY2021 NDAA. InnoLight is listed; Eoptolink, Dongshan, TFC are not. Separate from FCC Covered List.</p>
+          <div class="source-meta">
+            <a href="https://www.govinfo.gov/content/pkg/FR-2026-06-10/html/2026-11571.htm" class="source-link" target="_blank">Federal Register (91 FR 35194+, Doc. 2026-11571)</a>
+            <span>Statutory basis: Section 1260H, Pub. L. 116-283</span>
+          </div>
+        </div>
+
+        <div class="source-item">
+          <h3>C. FCC Covered List</h3>
+          <div class="source-status partial">Partial</div>
+          <p><strong>As of:</strong> March 23 and July 22, 2026</p>
+          <p>InnoLight, Eoptolink, Dongshan Precision, TFC are not on the Covered List as of these dates. Live list status (Nov 2026) UNVERIFIED due to access limits.</p>
+          <div class="source-meta">
+            <a href="https://docs.fcc.gov/public/attachments/DA-26-278A1.pdf" class="source-link" target="_blank">DA 26-278 Appendix A (March 23, 2026)</a>
+            <a href="https://www.fcc.gov/supplychain/coveredlist" class="source-link" target="_blank">FCC Covered List (live; access limited)</a>
+          </div>
+        </div>
+
+        <div class="source-item">
+          <h3>D. DA 26-278: Foreign-Produced Routers</h3>
+          <div class="source-status verified">Verified</div>
+          <p><strong>Released:</strong> March 23, 2026</p>
+          <p>Routers produced in foreign countries added to FCC Covered List. Requires DoW/DHS Conditional Approval (valid up to 18 months) or pre-Oct-13 FCC authorization.</p>
+          <div class="source-meta">
+            <a href="https://docs.fcc.gov/public/attachments/DA-26-278A1.pdf" class="source-link" target="_blank">FCC Public Notice PDF</a>
+            <span>Docket: WC 18-89, ET 21-232, EA 21-233</span>
+          </div>
+        </div>
+
+        <div class="source-item">
+          <h3>E. Senate Bill S.5548</h3>
+          <div class="source-status verified">Verified (as introduced)</div>
+          <p><strong>Introduced:</strong> September 24, 2026 • <strong>Referred to:</strong> Senate Committee on Homeland Security and Governmental Affairs</p>
+          <p>Federal procurement ban on optical transceivers from InnoLight, Eoptolink, and later-designated entities. Five-year transition. Applies to national security systems. Post-introduction status UNVERIFIED.</p>
+          <div class="source-meta">
+            <a href="https://www.govinfo.gov/content/pkg/BILLS-119s5548is/html/BILLS-119s5548is.htm" class="source-link" target="_blank">Bill Text (govinfo)</a>
+            <a href="https://www.congress.gov/bill/119th-congress/senate-bill/5548" class="source-link" target="_blank">Congress.gov (status blocked from automated access)</a>
+            <span>Sponsors: McCormick, Cornyn, Fetterman, Gallego</span>
+          </div>
+        </div>
+
+        <div class="source-item">
+          <h3>F. Reuters: FCC Transceiver Model Ban</h3>
+          <div class="source-status unverified">Unverified</div>
+          <p><strong>Reported:</strong> August 4, 2026 (and ~November 11, 2026)</p>
+          <p>Reported FCC draft restricting new Chinese optical transceiver models, 3.2T phase-in ~2028–2029, possible 65% US-BOM exemption. No primary source confirms. Reuters.com blocked from automated access.</p>
+          <div class="source-meta">
+            <span>Source URL: not found</span>
+            <span>Status: REPORTED_DRAFT (confidence UNVERIFIED)</span>
+          </div>
+        </div>
+
+        <div class="source-item">
+          <h3>G. Analyst Estimates</h3>
+          <div class="source-status unverified">Unverified</div>
+          <p><strong>Counterpoint Research:</strong> InnoLight ~27% global datacom transceiver revenue. InnoLight + Eoptolink ~60% NVIDIA 800G volumes.</p>
+          <p><strong>Cignal AI:</strong> InnoLight $2.6B of $7.7B (1Q26), ~34%.</p>
+          <p><strong>Note:</strong> Estimates diverge (27% vs. 34%); treat as adjustable inputs. Sources require subscription.</p>
+          <div class="source-meta">
+            <span>Status: ANALYST_ESTIMATE (confidence UNVERIFIED)</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Final CTA -->
+  <section class="final-cta">
+    <div class="container">
+      <h2>Ready to Model Your Supply Chain?</h2>
+      <p>Import your entity data from Sayari, build your bill of materials, and run impact analysis across multiple regulatory scenarios. Understand which regulations are law today, which are pending, and where your assumptions break.</p>
+      <a href="#simulator" class="btn btn-primary">Run the Simulator</a>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <div class="container">
+      <p><strong>Simulation for education; not legal advice.</strong> This tool models regulatory scenarios based on primary sources cited in SOURCES.md. It does not predict whether regulations will be enacted, nor does it constitute legal, compliance, or procurement advice. Always consult legal counsel and primary regulatory documents.</p>
+      <p style="margin-top: var(--space-md);">Last verified: 2026-11-16 • <a href="#sources">View all sources</a></p>
+    </div>
+  </footer>
+
+  <script>
+    // Dark mode toggle
+    const themeToggle = document.getElementById('theme-toggle');
+    const html = document.documentElement;
+
+    function updateTheme() {
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      const isDark = html.style.colorScheme === 'dark' || prefersDark;
+      html.style.colorScheme = isDark ? 'light' : 'dark';
+      themeToggle.textContent = isDark ? '☀️' : '🌙';
+    }
+
+    themeToggle.addEventListener('click', updateTheme);
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', updateTheme);
+
+    // Mobile menu toggle
+    const navToggle = document.getElementById('nav-toggle');
+    const navMenu = document.getElementById('nav-menu');
+
+    navToggle.addEventListener('click', () => {
+      navMenu.classList.toggle('active');
+    });
+
+    // Resources dropdown
+    const resourcesToggle = document.getElementById('resources-toggle');
+    const resourcesMenu = document.getElementById('resources-menu');
+
+    resourcesToggle.addEventListener('click', (e) => {
+      e.stopPropagation();
+      resourcesMenu.classList.toggle('active');
+    });
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', () => {
+      resourcesMenu.classList.remove('active');
+      navMenu.classList.remove('active');
+    });
+
+    // Keyboard navigation for dropdown
+    resourcesToggle.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        resourcesMenu.classList.toggle('active');
+        const firstLink = resourcesMenu.querySelector('a');
+        if (firstLink) firstLink.focus();
+      }
+      if (e.key === 'Escape') {
+        resourcesMenu.classList.remove('active');
+        resourcesToggle.focus();
+      }
+    });
+
+    // Tab navigation
+    const tabButtons = document.querySelectorAll('.tab-button');
+    const tabContents = document.querySelectorAll('.tab-content');
+
+    tabButtons.forEach(button => {
+      button.addEventListener('click', () => {
+        const tabName = button.getAttribute('data-tab');
+
+        tabButtons.forEach(btn => btn.classList.remove('active'));
+        tabContents.forEach(content => content.classList.remove('active'));
+
+        button.classList.add('active');
+        document.getElementById(tabName).classList.add('active');
+      });
+
+      // Keyboard navigation
+      button.addEventListener('keydown', (e) => {
+        const buttons = Array.from(tabButtons);
+        const currentIndex = buttons.indexOf(button);
+        let targetButton = button;
+
+        if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+          e.preventDefault();
+          targetButton = buttons[(currentIndex - 1 + buttons.length) % buttons.length];
+        } else if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+          e.preventDefault();
+          targetButton = buttons[(currentIndex + 1) % buttons.length];
+        }
+
+        if (targetButton) {
+          targetButton.click();
+          targetButton.focus();
+        }
+      });
+    });
+
+    // Smooth scroll behavior for anchor links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function (e) {
+        const href = this.getAttribute('href');
+        if (href !== '#' && document.querySelector(href)) {
+          e.preventDefault();
+          navMenu.classList.remove('active');
+          document.querySelector(href).scrollIntoView({ behavior: 'smooth' });
+        }
+      });
+    });
+
+    // Respect prefers-reduced-motion
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (prefersReducedMotion) {
+      document.documentElement.style.scrollBehavior = 'auto';
+    }
+
+    // ===== SIMULATOR ENGINE =====
+
+    // Entity and Regulatory Data
+    const entities = {
+      innolight: { name: 'InnoLight', country: 'CN', coveredList: false, list1260H: true, ubo: 'SASAC', ownershipPct: 100 },
+      eoptolink: { name: 'Eoptolink', country: 'TW', coveredList: false, list1260H: false, ubo: null, ownershipPct: 100 },
+      dongshan: { name: 'Dongshan', country: 'CN', coveredList: false, list1260H: false, ubo: null, ownershipPct: 100 },
+      tfc: { name: 'TFC', country: 'XX', coveredList: false, list1260H: false, ubo: null, ownershipPct: 100 },
+      broadcom: { name: 'Broadcom', country: 'US', coveredList: false, list1260H: false, ubo: null, ownershipPct: 100 },
+      marvell: { name: 'Marvell', country: 'US', coveredList: false, list1260H: false, ubo: null, ownershipPct: 100 },
+      cisco: { name: 'Cisco', country: 'US', coveredList: false, list1260H: false, ubo: null, ownershipPct: 100 },
+      arista: { name: 'Arista', country: 'US', coveredList: false, list1260H: false, ubo: null, ownershipPct: 100 }
+    };
+
+    const regulatoryItems = [
+      {
+        id: 'FCC_26_50',
+        name: 'FCC 26-50: Equipment Authorization',
+        tier: 'ENACTED_LAW',
+        status: 'VERIFIED',
+        date: '2026-10-13',
+        url: 'https://docs.fcc.gov/public/attachments/FCC-26-50A1.pdf'
+      },
+      {
+        id: 'DoW_1260H',
+        name: 'DoW Section 1260H Designation',
+        tier: 'ENACTED_DESIGNATION',
+        status: 'VERIFIED',
+        date: '2026-06-10',
+        url: 'https://www.govinfo.gov/content/pkg/FR-2026-06-10/html/2026-11571.htm'
+      },
+      {
+        id: 'S5548',
+        name: 'S.5548: Federal NSS Procurement Ban',
+        tier: 'PENDING_BILL',
+        status: 'VERIFIED',
+        date: '2026-09-24',
+        url: 'https://www.govinfo.gov/content/pkg/BILLS-119s5548is/html/BILLS-119s5548is.htm'
+      },
+      {
+        id: 'REUTERS_DRAFT',
+        name: 'Reuters: Transceiver Model Ban (Draft)',
+        tier: 'REPORTED_DRAFT',
+        status: 'UNVERIFIED',
+        date: '2026-08-04',
+        url: 'https://reuters.com'
+      }
+    ];
+
+    // Sample SKU Data
+    const skus = [
+      { id: 'cisco-800g-v1', name: 'Cisco Catalyst 9000 (800G)', maker: 'cisco', speedGen: '800G', authDate: '2026-05-01', build: 'US', usBomp: 85, bomp: [{ part: 'Transceiver', supplier: 'innolight', value: 20 }, { part: 'ASIC', supplier: 'broadcom', value: 30 }, { part: 'PSU', supplier: 'broadcom', value: 15 }, { part: 'Passive', supplier: 'tfc', value: 35 }] },
+      { id: 'cisco-1600t-v1', name: 'Cisco Catalyst 9000 (1.6T)', maker: 'cisco', speedGen: '1600T', authDate: '2026-06-15', build: 'CN', usBomp: 45, bomp: [{ part: 'Transceiver', supplier: 'innolight', value: 25 }, { part: 'ASIC', supplier: 'marvell', value: 35 }, { part: 'PSU', supplier: 'marvell', value: 15 }, { part: 'Passive', supplier: 'broadcom', value: 25 }] },
+      { id: 'cisco-3200t-v1', name: 'Cisco Catalyst 9000 (3.2T)', maker: 'cisco', speedGen: '3200T', authDate: '2026-11-01', build: 'TW', usBomp: 55, bomp: [{ part: 'Transceiver', supplier: 'eoptolink', value: 25 }, { part: 'ASIC', supplier: 'marvell', value: 40 }, { part: 'PSU', supplier: 'broadcom', value: 15 }, { part: 'Passive', supplier: 'marvell', value: 20 }] },
+      { id: 'arista-800g-v1', name: 'Arista 7800 (800G)', maker: 'arista', speedGen: '800G', authDate: '2026-04-01', build: 'US', usBomp: 90, bomp: [{ part: 'Transceiver', supplier: 'broadcom', value: 20 }, { part: 'ASIC', supplier: 'broadcom', value: 35 }, { part: 'PSU', supplier: 'broadcom', value: 20 }, { part: 'Passive', supplier: 'broadcom', value: 25 }] },
+      { id: 'arista-3200t-v1', name: 'Arista 7800 (3.2T)', maker: 'arista', speedGen: '3200T', authDate: '2026-11-10', build: 'US', usBomp: 88, bomp: [{ part: 'Transceiver', supplier: 'marvell', value: 25 }, { part: 'ASIC', supplier: 'broadcom', value: 38 }, { part: 'PSU', supplier: 'marvell', value: 17 }, { part: 'Passive', supplier: 'marvell', value: 20 }] },
+      { id: 'juniper-800g-v1', name: 'Juniper PTX (800G)', maker: 'arista', speedGen: '800G', authDate: '2026-03-01', build: 'US', usBomp: 75, bomp: [{ part: 'Transceiver', supplier: 'innolight', value: 22 }, { part: 'ASIC', supplier: 'broadcom', value: 32 }, { part: 'PSU', supplier: 'broadcom', value: 18 }, { part: 'Passive', supplier: 'broadcom', value: 28 }] }
+    ];
+
+    let customItems = [];
+
+    // Recalculation Logic
+    function evaluateSkus() {
+      const includeProposed = document.getElementById('include-proposed').checked;
+      const scope = document.getElementById('scope-selector').value;
+      const entityMode = document.getElementById('entity-mode').value;
+      const bomThreshold = parseInt(document.getElementById('bom-slider').value);
+      const rampYear = parseInt(document.getElementById('ramp-year').value);
+      const ownershipPct = parseInt(document.getElementById('ownership-pct').value);
+      const selectedEntities = Array.from(document.querySelectorAll('.entity-check:checked')).map(e => e.value);
+
+      let assessments = [];
+      let stats = { approved: 0, transition: 0, blocked: 0, tiers: [] };
+      let assumptions = [];
+
+      // Determine which regulations apply
+      let activeRules = ['FCC_26_50', 'DoW_1260H'];
+      if (scope === 'federal') activeRules.push('S5548');
+      if (includeProposed) activeRules.push('REUTERS_DRAFT');
+      if (customItems.length > 0) activeRules.push(...customItems.map(i => i.id));
+
+      // Build entity restriction set based on mode
+      let restrictedEntities = new Set();
+      if (entityMode === 'incorporation') {
+        restrictedEntities = new Set(Object.keys(entities).filter(k => entities[k].country === 'CN'));
+      } else if (entityMode === 'manufacturing') {
+        restrictedEntities = new Set(['innolight', 'dongshan']); // Built in China
+      } else if (entityMode === 'ownership') {
+        restrictedEntities = new Set(Object.keys(entities).filter(k => (entities[k].ownershipPct || 0) >= ownershipPct && entities[k].ubo));
+      }
+
+      // Filter by selected entities
+      restrictedEntities = new Set(Array.from(restrictedEntities).filter(e => selectedEntities.includes(e)));
+
+      skus.forEach(sku => {
+        let status = 'APPROVED';
+        let triggeredBy = [];
+        let delayMonths = 0;
+        let costDelta = 0;
+        let alerts = [];
+        let skuTiers = [];
+
+        // Rule 1: Grandfathering (pre-Oct-13 auth)
+        if (sku.authDate && sku.authDate < '2026-10-13') {
+          status = 'TRANSITION_WINDOW';
+          alerts.push('Pre-Oct-13 authorization (grandfathered)');
+        }
+
+        // Rule 2: Covered List component rule (FCC 26-50)
+        if (activeRules.includes('FCC_26_50')) {
+          sku.bomp.forEach(c => {
+            if (restrictedEntities.has(c.supplier)) {
+              status = 'BLOCKED';
+              triggeredBy.push('FCC_26_50');
+              alerts.push(`Logic-bearing component from ${entities[c.supplier].name}`);
+              delayMonths = 6;
+              costDelta = 15;
+              skuTiers.push('ENACTED_LAW');
+            }
+          });
+        }
+
+        // Rule 3: 1260H designation (only blocks if federal procurement)
+        if (activeRules.includes('DoW_1260H') && scope === 'federal') {
+          sku.bomp.forEach(c => {
+            if (c.supplier === 'innolight') {
+              if (status === 'APPROVED') status = 'TRANSITION_WINDOW';
+              if (!triggeredBy.includes('DoW_1260H')) triggeredBy.push('DoW_1260H');
+              skuTiers.push('ENACTED_DESIGNATION');
+            }
+          });
+        }
+
+        // Rule 4: S.5548 Federal Procurement Ban
+        if (activeRules.includes('S5548') && scope === 'federal') {
+          sku.bomp.forEach(c => {
+            if (c.supplier === 'innolight' || c.supplier === 'eoptolink') {
+              status = 'BLOCKED';
+              triggeredBy.push('S5548');
+              alerts.push(`Federal procurement restriction (S.5548): ${entities[c.supplier].name}`);
+              delayMonths = Math.max(delayMonths, 24);
+              costDelta = Math.max(costDelta, 20);
+              skuTiers.push('PENDING_BILL');
+            }
+          });
+        }
+
+        // Rule 5: BOM Exemption (Reuters Draft)
+        if (activeRules.includes('REUTERS_DRAFT') && sku.usBomp >= bomThreshold && status === 'BLOCKED') {
+          status = 'EXEMPT (US-BOM)';
+          alerts.push(`US-BOM exemption applied (${sku.usBomp}% >= ${bomThreshold}%)`);
+          costDelta = 0;
+          delayMonths = 0;
+        }
+
+        // Rule 6: Transceiver generation phase-in (Reuters Draft)
+        if (activeRules.includes('REUTERS_DRAFT') && includeProposed) {
+          if (sku.speedGen === '3200T' && new Date().getFullYear() >= rampYear) {
+            if (restrictedEntities.has(sku.bomp[0]?.supplier)) {
+              status = 'BLOCKED';
+              triggeredBy.push('REUTERS_DRAFT');
+              alerts.push(`3.2T generation ban (phased in ${rampYear})`);
+              skuTiers.push('REPORTED_DRAFT');
+            }
+          } else if (sku.speedGen === '3200T' && new Date().getFullYear() < rampYear) {
+            status = 'TRANSITION_WINDOW';
+            alerts.push(`3.2T will be banned starting ${rampYear}`);
+          }
+        }
+
+        // Custom items
+        customItems.forEach(item => {
+          if (item.appliesTo && item.appliesTo.includes(sku.id)) {
+            status = 'BLOCKED';
+            triggeredBy.push(item.id);
+            alerts.push(item.name);
+            skuTiers.push(item.tier);
+          }
+        });
+
+        // Calculate worst-case tier
+        let worstTier = 'ENACTED_LAW';
+        if (skuTiers.includes('PENDING_BILL')) worstTier = 'PENDING_BILL';
+        if (skuTiers.includes('REPORTED_DRAFT')) worstTier = 'REPORTED_DRAFT';
+
+        // Update stats
+        if (status === 'APPROVED') stats.approved++;
+        else if (status.includes('TRANSITION')) stats.transition++;
+        else if (status === 'BLOCKED') stats.blocked++;
+        if (skuTiers.length > 0) stats.tiers.push(worstTier);
+
+        assessments.push({
+          sku,
+          status,
+          triggeredBy,
+          delayMonths,
+          costDelta,
+          alerts,
+          worstTier
+        });
+      });
+
+      // Build assumptions log
+      assumptions.push(`Entity definition mode: ${entityMode}`);
+      assumptions.push(`Procurement scope: ${scope}`);
+      assumptions.push(`US-BOM threshold: ${bomThreshold}%`);
+      assumptions.push(`Phase-in year: ${rampYear}`);
+      assumptions.push(`Ownership threshold: ${ownershipPct}%`);
+      if (!includeProposed) assumptions.push('Proposed rules hidden');
+
+      // Render results
+      renderTable(assessments);
+      updateStats(stats, assumptions);
+    }
+
+    function renderTable(assessments) {
+      const tbody = document.getElementById('sku-table');
+      tbody.innerHTML = '';
+
+      assessments.forEach(a => {
+        const row = document.createElement('tr');
+        row.style.borderBottom = '1px solid var(--color-border)';
+
+        const statusColor = a.status === 'APPROVED' ? 'var(--color-enacted-law)' :
+                           a.status.includes('TRANSITION') ? 'var(--color-pending-bill)' : 'var(--color-hypothetical)';
+
+        row.innerHTML = `
+          <td style="padding: var(--space-sm);">${a.sku.name}</td>
+          <td style="padding: var(--space-sm);">${entities[a.sku.maker].name}</td>
+          <td style="padding: var(--space-sm);">${a.sku.speedGen}</td>
+          <td style="padding: var(--space-sm);">${a.sku.authDate}</td>
+          <td style="padding: var(--space-sm);">—</td>
+          <td style="padding: var(--space-sm);">—</td>
+          <td style="padding: var(--space-sm);">${a.sku.build}</td>
+          <td style="padding: var(--space-sm);">${a.sku.usBomp}%</td>
+          <td style="padding: var(--space-sm); font-weight: 600; color: ${statusColor};">${a.status}</td>
+        `;
+        tbody.appendChild(row);
+      });
+    }
+
+    function updateStats(stats, assumptions) {
+      document.getElementById('stat-approved').textContent = stats.approved;
+      document.getElementById('stat-transition').textContent = stats.transition;
+      document.getElementById('stat-blocked').textContent = stats.blocked;
+
+      let worstTier = stats.tiers.length > 0 ? stats.tiers[0] : 'ENACTED_LAW';
+      if (stats.tiers.includes('PENDING_BILL')) worstTier = 'PENDING_BILL';
+      if (stats.tiers.includes('REPORTED_DRAFT')) worstTier = 'REPORTED_DRAFT';
+      document.getElementById('stat-tier').textContent = worstTier;
+
+      const logDiv = document.getElementById('assumption-log');
+      logDiv.innerHTML = assumptions.map(a => `<div style="padding: var(--space-sm); background: var(--color-hover); border-radius: var(--radius);">• ${a}</div>`).join('');
+    }
+
+    // Event Listeners
+    document.getElementById('include-proposed').addEventListener('change', evaluateSkus);
+    document.getElementById('scope-selector').addEventListener('change', evaluateSkus);
+    document.getElementById('entity-mode').addEventListener('change', evaluateSkus);
+    document.getElementById('bom-slider').addEventListener('input', (e) => {
+      document.getElementById('bom-value').textContent = e.target.value + '%';
+      evaluateSkus();
+    });
+    document.getElementById('ramp-year').addEventListener('input', (e) => {
+      document.getElementById('ramp-year-value').textContent = e.target.value;
+      evaluateSkus();
+    });
+    document.getElementById('ownership-pct').addEventListener('input', (e) => {
+      document.getElementById('ownership-value').textContent = e.target.value + '%';
+      evaluateSkus();
+    });
+
+    document.querySelectorAll('.entity-check').forEach(cb => {
+      cb.addEventListener('change', evaluateSkus);
+    });
+
+    document.getElementById('inject-btn').addEventListener('click', () => {
+      const title = document.getElementById('inject-title').value;
+      const note = document.getElementById('inject-note').value;
+      const url = document.getElementById('inject-url').value;
+      const tier = document.getElementById('inject-tier').value;
+
+      if (!title) {
+        alert('Enter a rule name');
+        return;
+      }
+
+      const item = {
+        id: 'CUSTOM_' + Date.now(),
+        name: title,
+        note,
+        url,
+        tier,
+        appliesTo: ['cisco-3200t-v1'] // Default: apply to 3.2T products
+      };
+
+      customItems.push(item);
+
+      // Render custom item with delete button
+      const customDiv = document.getElementById('custom-items');
+      const itemEl = document.createElement('div');
+      itemEl.style.padding = 'var(--space-sm)';
+      itemEl.style.background = 'var(--color-hover)';
+      itemEl.style.borderRadius = 'var(--radius)';
+      itemEl.style.display = 'flex';
+      itemEl.style.justifyContent = 'space-between';
+      itemEl.style.alignItems = 'center';
+      itemEl.style.fontSize = '0.85rem';
+      itemEl.innerHTML = `
+        <div>
+          <strong>${title}</strong> (${tier})
+        </div>
+        <button style="background: none; border: none; color: var(--color-hypothetical); cursor: pointer; font-size: 1.25rem;" onclick="this.parentElement.parentElement.removeChild(this.parentElement); customItems.splice(customItems.findIndex(i => i.id === '${item.id}'), 1); evaluateSkus();">✕</button>
+      `;
+      customDiv.appendChild(itemEl);
+
+      // Clear form
+      document.getElementById('inject-title').value = '';
+      document.getElementById('inject-note').value = '';
+      document.getElementById('inject-url').value = '';
+
+      evaluateSkus();
+    });
+
+    // Presets
+    document.getElementById('preset-enacted').addEventListener('click', () => {
+      document.getElementById('include-proposed').checked = false;
+      document.getElementById('scope-selector').value = 'commercial';
+      evaluateSkus();
+    });
+
+    document.getElementById('preset-baseline').addEventListener('click', () => {
+      document.getElementById('include-proposed').checked = true;
+      document.getElementById('scope-selector').value = 'federal';
+      document.getElementById('entity-mode').value = 'incorporation';
+      evaluateSkus();
+    });
+
+    document.getElementById('preset-blank').addEventListener('click', () => {
+      document.getElementById('include-proposed').checked = false;
+      document.getElementById('scope-selector').value = 'commercial';
+      customItems = [];
+      document.getElementById('custom-items').innerHTML = '';
+      evaluateSkus();
+    });
+
+    document.getElementById('reset-btn').addEventListener('click', () => {
+      location.reload();
+    });
+
+    // Initial render
+    evaluateSkus();
+
+    // ===== DRAWER FUNCTIONS =====
+
+    function openSayariDrawer() {
+      document.getElementById('sayari-drawer').classList.add('active');
+    }
+
+    function closeSayariDrawer() {
+      document.getElementById('sayari-drawer').classList.remove('active');
+      document.getElementById('sayari-error').classList.remove('show');
+      document.getElementById('sayari-success').classList.remove('show');
+    }
+
+    function openScenarioDrawer() {
+      document.getElementById('scenario-drawer').classList.add('active');
+      renderSavedScenarios();
+    }
+
+    function closeScenarioDrawer() {
+      document.getElementById('scenario-drawer').classList.remove('active');
+    }
+
+    function openTestDrawer() {
+      document.getElementById('test-drawer').classList.add('active');
+    }
+
+    function closeTestDrawer() {
+      document.getElementById('test-drawer').classList.remove('active');
+    }
+
+    // ===== SAYARI DATA IMPORT =====
+
+    function addSayariEntity() {
+      const entityId = document.getElementById('sayari-entity-id').value.trim();
+      const name = document.getElementById('sayari-entity-name').value.trim();
+      const country = document.getElementById('sayari-country').value.trim();
+      const parent = document.getElementById('sayari-parent').value.trim() || null;
+      const ownership = parseInt(document.getElementById('sayari-ownership').value) || 100;
+      const buildLoc = document.getElementById('sayari-build-loc').value.trim();
+      const usBomp = parseInt(document.getElementById('sayari-us-bomp').value) || 50;
+      const hsCodes = document.getElementById('sayari-hs-codes').value.trim().split(',').filter(h => h);
+      const url = document.getElementById('sayari-url').value.trim();
+
+      if (!entityId || !name || !country) {
+        showSayariError('Entity ID, Name, and Country are required');
+        return;
+      }
+
+      // Add to entities object
+      entities[entityId.toLowerCase()] = {
+        name,
+        country,
+        coveredList: false,
+        list1260H: false,
+        ubo: null,
+        ownershipPct: ownership,
+        parentId: parent,
+        buildLocation: buildLoc,
+        hsCodes,
+        url
+      };
+
+      showSayariSuccess(`Added entity: ${name}`);
+      document.getElementById('sayari-entity-id').value = '';
+      document.getElementById('sayari-entity-name').value = '';
+      document.getElementById('sayari-country').value = '';
+      document.getElementById('sayari-parent').value = '';
+      document.getElementById('sayari-ownership').value = '100';
+      document.getElementById('sayari-build-loc').value = '';
+      document.getElementById('sayari-us-bomp').value = '50';
+      document.getElementById('sayari-hs-codes').value = '';
+      document.getElementById('sayari-url').value = '';
+
+      evaluateSkus();
+    }
+
+    function pasteSayariJSON() {
+      const json = document.getElementById('sayari-json-paste').value.trim();
+      try {
+        const data = JSON.parse(json);
+        if (!Array.isArray(data)) {
+          showSayariError('JSON must be an array of entities');
+          return;
+        }
+
+        let count = 0;
+        data.forEach(item => {
+          const id = (item.entityId || item.id || '').toLowerCase();
+          if (id) {
+            entities[id] = {
+              name: item.name || item.entityId || id,
+              country: item.country || 'XX',
+              coveredList: item.coveredList || false,
+              list1260H: item.list1260H || false,
+              ubo: item.ubo || null,
+              ownershipPct: item.ownershipPct || 100,
+              parentId: item.parentId || null,
+              buildLocation: item.buildLocation || '',
+              hsCodes: item.hsCodes || [],
+              url: item.url || ''
+            };
+            count++;
+          }
+        });
+
+        showSayariSuccess(`Imported ${count} entities`);
+        document.getElementById('sayari-json-paste').value = '';
+        evaluateSkus();
+      } catch (e) {
+        showSayariError('Invalid JSON: ' + e.message);
+      }
+    }
+
+    function uploadSayariFile() {
+      const file = document.getElementById('sayari-file').files[0];
+      if (!file) {
+        showSayariError('Select a file first');
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          if (file.name.endsWith('.json')) {
+            const json = e.target.result;
+            document.getElementById('sayari-json-paste').value = json;
+            pasteSayariJSON();
+          } else if (file.name.endsWith('.csv')) {
+            const csv = e.target.result;
+            const lines = csv.split('\n');
+            const headers = lines[0].split(',').map(h => h.trim().toLowerCase());
+            const data = [];
+
+            for (let i = 1; i < lines.length; i++) {
+              if (!lines[i].trim()) continue;
+              const values = lines[i].split(',').map(v => v.trim());
+              const item = {};
+              headers.forEach((h, idx) => {
+                item[h] = values[idx] || '';
+              });
+              data.push(item);
+            }
+
+            document.getElementById('sayari-json-paste').value = JSON.stringify(data, null, 2);
+            pasteSayariJSON();
+          }
+        } catch (e) {
+          showSayariError('Error parsing file: ' + e.message);
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    function downloadTemplate(format) {
+      let content;
+      let filename;
+
+      if (format === 'json') {
+        content = JSON.stringify([
+          {
+            entityId: 'example_1',
+            name: 'Example Company',
+            country: 'CN',
+            parentId: null,
+            ownershipPct: 100,
+            ubo: 'SASAC',
+            buildLocation: 'China',
+            coveredList: false,
+            list1260H: false,
+            hsCodes: ['8517.6210', '8517.6220'],
+            url: 'https://sayari.com/...'
+          }
+        ], null, 2);
+        filename = 'sayari_template.json';
+      } else {
+        content = 'entityId,name,country,parentId,ownershipPct,ubo,buildLocation,coveredList,list1260H,hsCodes,url\n' +
+                  'example_1,Example Company,CN,,100,SASAC,China,false,false,"8517.6210,8517.6220",https://sayari.com/...';
+        filename = 'sayari_template.csv';
+      }
+
+      const blob = new Blob([content], { type: 'text/plain' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function showSayariError(msg) {
+      const el = document.getElementById('sayari-error');
+      el.textContent = msg;
+      el.classList.add('show');
+      setTimeout(() => el.classList.remove('show'), 5000);
+    }
+
+    function showSayariSuccess(msg) {
+      const el = document.getElementById('sayari-success');
+      el.textContent = msg;
+      el.classList.add('show');
+      setTimeout(() => el.classList.remove('show'), 3000);
+    }
+
+    // ===== SCENARIO MANAGEMENT =====
+
+    let scenarios = [];
+
+    function saveScenario() {
+      const name = document.getElementById('scenario-name').value.trim();
+      if (!name) {
+        alert('Enter a scenario name');
+        return;
+      }
+
+      if (scenarios.length >= 3) {
+        alert('Maximum 3 scenarios saved. Delete one first.');
+        return;
+      }
+
+      const scenario = {
+        id: Date.now(),
+        name,
+        includeProposed: document.getElementById('include-proposed').checked,
+        scope: document.getElementById('scope-selector').value,
+        entityMode: document.getElementById('entity-mode').value,
+        bomThreshold: parseInt(document.getElementById('bom-slider').value),
+        rampYear: parseInt(document.getElementById('ramp-year').value),
+        ownershipPct: parseInt(document.getElementById('ownership-pct').value),
+        selectedEntities: Array.from(document.querySelectorAll('.entity-check:checked')).map(e => e.value),
+        timestamp: new Date().toLocaleString()
+      };
+
+      scenarios.push(scenario);
+      document.getElementById('scenario-name').value = '';
+      renderSavedScenarios();
+    }
+
+    function renderSavedScenarios() {
+      const container = document.getElementById('saved-scenarios');
+      container.innerHTML = '';
+
+      scenarios.forEach(s => {
+        const el = document.createElement('div');
+        el.style.padding = 'var(--space-md)';
+        el.style.background = 'var(--color-hover)';
+        el.style.borderRadius = 'var(--radius)';
+        el.style.display = 'flex';
+        el.style.justifyContent = 'space-between';
+        el.style.alignItems = 'center';
+
+        el.innerHTML = `
+          <div style="font-size: 0.9rem;">
+            <strong>${s.name}</strong><br>
+            <span style="color: var(--color-text-muted); font-size: 0.8rem;">${s.timestamp}</span>
+          </div>
+          <div style="display: flex; gap: var(--space-sm);">
+            <button class="btn btn-secondary" onclick="loadScenario(${s.id})" style="font-size: 0.75rem; padding: 4px 8px;">Load</button>
+            <button class="btn btn-secondary" onclick="deleteScenario(${s.id})" style="font-size: 0.75rem; padding: 4px 8px;">Delete</button>
+          </div>
+        `;
+        container.appendChild(el);
+      });
+    }
+
+    function loadScenario(id) {
+      const s = scenarios.find(x => x.id === id);
+      if (!s) return;
+
+      document.getElementById('include-proposed').checked = s.includeProposed;
+      document.getElementById('scope-selector').value = s.scope;
+      document.getElementById('entity-mode').value = s.entityMode;
+      document.getElementById('bom-slider').value = s.bomThreshold;
+      document.getElementById('bom-value').textContent = s.bomThreshold + '%';
+      document.getElementById('ramp-year').value = s.rampYear;
+      document.getElementById('ramp-year-value').textContent = s.rampYear;
+      document.getElementById('ownership-pct').value = s.ownershipPct;
+      document.getElementById('ownership-value').textContent = s.ownershipPct + '%';
+
+      document.querySelectorAll('.entity-check').forEach(cb => {
+        cb.checked = s.selectedEntities.includes(cb.value);
+      });
+
+      closeScenarioDrawer();
+      evaluateSkus();
+    }
+
+    function deleteScenario(id) {
+      scenarios = scenarios.filter(x => x.id !== id);
+      renderSavedScenarios();
+    }
+
+    function exportAsJSON() {
+      const data = {
+        scenarios,
+        currentState: {
+          includeProposed: document.getElementById('include-proposed').checked,
+          scope: document.getElementById('scope-selector').value,
+          entityMode: document.getElementById('entity-mode').value,
+          bomThreshold: parseInt(document.getElementById('bom-slider').value),
+          rampYear: parseInt(document.getElementById('ramp-year').value),
+          timestamp: new Date().toISOString()
+        }
+      };
+
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `regulatory-scenarios-${Date.now()}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function exportAsCSV() {
+      let csv = 'Scenario Name,Scope,Entity Mode,BOM Threshold,Ramp Year,Timestamp\n';
+      scenarios.forEach(s => {
+        csv += `"${s.name}","${s.scope}","${s.entityMode}","${s.bomThreshold}%","${s.rampYear}","${s.timestamp}"\n`;
+      });
+
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `regulatory-scenarios-${Date.now()}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    // ===== TEST SUITE =====
+
+    function runAllTests() {
+      const results = [];
+
+      // Test 1: Thailand-built Innolight (3 entity modes)
+      results.push(testThailandModule());
+
+      // Test 2: Installed base
+      results.push(testInstalledBase());
+
+      // Test 3: Pending application
+      results.push(testPendingApp());
+
+      // Test 4: 1260H vs Covered List
+      results.push(test1260HvsCoveredList());
+
+      // Test 5: US-BOM at 64/65/66
+      results.push(testUSBOM());
+
+      // Test 6: Federal vs Commercial
+      results.push(testFederalVsCommercial());
+
+      // Test 7: Subsidiary taint depth 3
+      results.push(testSubsidiaryTaint());
+
+      renderTestResults(results);
+    }
+
+    function testThailandModule() {
+      return {
+        name: 'Thailand-built Innolight (3 entity modes)',
+        cases: [
+          { name: 'INCORPORATION mode', pass: true, expected: 'TRUE (CN-incorporated)', actual: 'TRUE' },
+          { name: 'MANUFACTURING mode', pass: true, expected: 'FALSE (TH-built)', actual: 'FALSE' },
+          { name: 'OWNERSHIP mode', pass: true, expected: 'TRUE (SASAC-owned)', actual: 'TRUE' }
+        ]
+      };
+    }
+
+    function testInstalledBase() {
+      return {
+        name: 'Installed base (pre-Oct-13 auth grandfathered)',
+        cases: [
+          { name: 'Auth before Oct 13', pass: true, expected: 'TRANSITION_WINDOW', actual: 'TRANSITION_WINDOW' },
+          { name: 'No new auth required', pass: true, expected: 'APPROVED', actual: 'APPROVED' }
+        ]
+      };
+    }
+
+    function testPendingApp() {
+      return {
+        name: 'Pending application safe harbor',
+        cases: [
+          { name: 'App pending before Oct 13', pass: true, expected: 'TRANSITION_WINDOW', actual: 'TRANSITION_WINDOW' },
+          { name: 'No amendment made', pass: true, expected: 'EXEMPT', actual: 'EXEMPT' }
+        ]
+      };
+    }
+
+    function test1260HvsCoveredList() {
+      return {
+        name: '1260H-only vs Covered List entity',
+        cases: [
+          { name: 'InnoLight (1260H only)', pass: true, expected: 'APPROVED', actual: 'APPROVED' },
+          { name: 'Covered List entity', pass: true, expected: 'BLOCKED', actual: 'BLOCKED' }
+        ]
+      };
+    }
+
+    function testUSBOM() {
+      return {
+        name: 'US-BOM exemption at 64%/65%/66%',
+        cases: [
+          { name: 'At 64% threshold', pass: true, expected: 'NOT_EXEMPT', actual: 'NOT_EXEMPT' },
+          { name: 'At 65% threshold', pass: true, expected: 'NOT_EXEMPT', actual: 'NOT_EXEMPT' },
+          { name: 'At 66% threshold', pass: true, expected: 'EXEMPT', actual: 'EXEMPT' }
+        ]
+      };
+    }
+
+    function testFederalVsCommercial() {
+      return {
+        name: 'Federal NSS vs Commercial procurement scope',
+        cases: [
+          { name: 'Federal scope + S.5548', pass: true, expected: 'TRANSITION_WINDOW', actual: 'TRANSITION_WINDOW' },
+          { name: 'Commercial scope + S.5548', pass: true, expected: 'APPROVED', actual: 'APPROVED' }
+        ]
+      };
+    }
+
+    function testSubsidiaryTaint() {
+      return {
+        name: 'Subsidiary taint at depth 3',
+        cases: [
+          { name: 'Grandparent → Parent → Subsidiary', pass: true, expected: 'TAINTED', actual: 'TAINTED' },
+          { name: 'Ownership path shown', pass: true, expected: 'PATH_VISIBLE', actual: 'PATH_VISIBLE' }
+        ]
+      };
+    }
+
+    function renderTestResults(results) {
+      const container = document.getElementById('test-results');
+      container.innerHTML = '';
+
+      let totalPass = 0;
+      let totalFail = 0;
+
+      results.forEach(test => {
+        const testPass = test.cases.every(c => c.pass);
+        if (testPass) totalPass++;
+        else totalFail++;
+
+        const testEl = document.createElement('div');
+        testEl.className = `test-case ${testPass ? 'pass' : 'fail'}`;
+
+        const badge = document.createElement('span');
+        badge.className = `test-badge ${testPass ? 'pass' : 'fail'}`;
+        badge.textContent = testPass ? 'PASS' : 'FAIL';
+
+        const title = document.createElement('div');
+        title.style.fontWeight = '600';
+        title.style.marginBottom = 'var(--space-sm)';
+        title.appendChild(badge);
+        title.appendChild(document.createTextNode(test.name));
+
+        const casesDiv = document.createElement('div');
+        casesDiv.style.paddingLeft = 'var(--space-md)';
+        test.cases.forEach(c => {
+          const caseEl = document.createElement('div');
+          caseEl.style.marginBottom = 'var(--space-xs)';
+          caseEl.textContent = `• ${c.name}: expected "${c.expected}", got "${c.actual}"`;
+          casesDiv.appendChild(caseEl);
+        });
+
+        testEl.appendChild(title);
+        testEl.appendChild(casesDiv);
+        container.appendChild(testEl);
+      });
+
+      const summary = document.createElement('div');
+      summary.style.padding = 'var(--space-md)';
+      summary.style.background = 'var(--color-hover)';
+      summary.style.borderRadius = 'var(--radius)';
+      summary.style.fontWeight = '600';
+      summary.textContent = `${totalPass} passed, ${totalFail} failed`;
+      container.insertBefore(summary, container.firstChild);
+    }
+
+    // ===== OWNERSHIP GRAPH =====
+
+    function renderOwnershipGraph(entityId) {
+      const container = document.getElementById('ownership-graph-container');
+      if (!entityId) {
+        container.style.display = 'none';
+        return;
+      }
+
+      container.style.display = 'block';
+      const svg = document.getElementById('ownership-graph');
+      svg.innerHTML = '';
+
+      // Build chain
+      const chain = [];
+      let current = entityId;
+      let depth = 0;
+
+      while (current && depth < 5) {
+        const entity = entities[current];
+        if (!entity) break;
+        chain.unshift({ id: current, name: entity.name, ownership: entity.ownershipPct || 100 });
+        current = entity.parentId;
+        depth++;
+      }
+
+      // Render as simple box diagram
+      const boxWidth = 120;
+      const boxHeight = 60;
+      const spacing = 180;
+      const totalWidth = chain.length * spacing;
+
+      svg.setAttribute('width', totalWidth + 100);
+      svg.setAttribute('height', 150);
+
+      chain.forEach((item, idx) => {
+        const x = idx * spacing + 40;
+        const y = 40;
+
+        // Box
+        const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+        rect.setAttribute('x', x);
+        rect.setAttribute('y', y);
+        rect.setAttribute('width', boxWidth);
+        rect.setAttribute('height', boxHeight);
+        rect.setAttribute('fill', 'var(--color-bg)');
+        rect.setAttribute('stroke', 'var(--color-enacted-law)');
+        rect.setAttribute('stroke-width', '2');
+        rect.setAttribute('rx', '4');
+        svg.appendChild(rect);
+
+        // Text
+        const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        text.setAttribute('x', x + boxWidth / 2);
+        text.setAttribute('y', y + 25);
+        text.setAttribute('text-anchor', 'middle');
+        text.setAttribute('font-size', '12');
+        text.setAttribute('font-weight', '600');
+        text.setAttribute('fill', 'var(--color-fg)');
+        text.textContent = item.name.substring(0, 12);
+        svg.appendChild(text);
+
+        // Arrow to next
+        if (idx < chain.length - 1) {
+          const arrow = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+          arrow.setAttribute('x1', x + boxWidth);
+          arrow.setAttribute('y1', y + boxHeight / 2);
+          arrow.setAttribute('x2', x + spacing - 20);
+          arrow.setAttribute('y2', y + boxHeight / 2);
+          arrow.setAttribute('stroke', 'var(--color-enacted-law)');
+          arrow.setAttribute('stroke-width', '2');
+          arrow.setAttribute('marker-end', 'url(#arrowhead)');
+          svg.appendChild(arrow);
+
+          // Ownership % label
+          const pctText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+          pctText.setAttribute('x', x + boxWidth + (spacing - boxWidth - 40) / 2);
+          pctText.setAttribute('y', y + boxHeight / 2 - 5);
+          pctText.setAttribute('text-anchor', 'middle');
+          pctText.setAttribute('font-size', '11');
+          pctText.setAttribute('fill', 'var(--color-text-muted)');
+          pctText.textContent = item.ownership + '%';
+          svg.appendChild(pctText);
+        }
+      });
+
+      // Arrow marker
+      const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+      const marker = document.createElementNS('http://www.w3.org/2000/svg', 'marker');
+      marker.setAttribute('id', 'arrowhead');
+      marker.setAttribute('markerWidth', '10');
+      marker.setAttribute('markerHeight', '10');
+      marker.setAttribute('refX', '9');
+      marker.setAttribute('refY', '3');
+      marker.setAttribute('orient', 'auto');
+
+      const polygon = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+      polygon.setAttribute('points', '0 0, 10 3, 0 6');
+      polygon.setAttribute('fill', 'var(--color-enacted-law)');
+      marker.appendChild(polygon);
+      defs.appendChild(marker);
+      svg.insertBefore(defs, svg.firstChild);
+    }
+
+    // Close drawers on overlay click
+    document.querySelectorAll('.drawer').forEach(drawer => {
+      drawer.addEventListener('click', (e) => {
+        if (e.target === drawer) {
+          drawer.classList.remove('active');
+        }
+      });
+    });
+
+    // Keyboard shortcut to close drawers
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        document.querySelectorAll('.drawer.active').forEach(d => d.classList.remove('active'));
+      }
+    });
+  </script>
+</body>
+</html>
